@@ -15,6 +15,7 @@
 ![Screenshot](web/screenshot.png "Screenshot")
 
 
+
 <div align="center">
 	<a href="https://github.com/th-ch/youtube-music/releases/latest">
 		<img src="web/youtube-music.svg" width="400" height="100" alt="YouTube Music SVG">
