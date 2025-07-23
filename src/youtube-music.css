@@ -92,3 +92,21 @@ tp-yt-iron-dropdown,
 tp-yt-paper-dialog {
   app-region: no-drag;
 }
+
+#ytmd-playback-controller {
+  position: absolute;
+  bottom: 80px;
+  right: 20px;
+  z-index: 9999;
+  padding: 10px;
+  background-color: rgba(0, 0, 0, 0.6);
+  border-radius: 8px;
+  color: white;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+#ytmd-playback-slider {
+  width: 120px;
+}

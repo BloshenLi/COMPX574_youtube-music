@@ -298,6 +298,36 @@ async function onApiLoaded() {
   );
 
   const video = document.querySelector('video')!;
+
+  const playbackRateContainer = document.createElement('div');
+  playbackRateContainer.id = 'ytmd-playback-controller';
+
+  const label = document.createElement('span');
+  label.id = 'ytmd-playback-label';
+  label.textContent = 'Speed: 1x';
+
+  const slider = document.createElement('input');
+  slider.type = 'range';
+  slider.min = '0.5';
+  slider.max = '2';
+  slider.step = '0.25';
+  slider.value = '1';
+  slider.id = 'ytmd-playback-slider';
+
+  slider.addEventListener('input', () => {
+    const rate = parseFloat(slider.value);
+    const video = document.querySelector('video');
+    if (video) {
+      video.playbackRate = rate;
+      label.textContent = `Speed: ${rate.toFixed(2)}x`;
+    }
+  });
+
+  playbackRateContainer.appendChild(label);
+  playbackRateContainer.appendChild(slider);
+  document.body.appendChild(playbackRateContainer);
+
+
   const audioContext = new AudioContext();
   const audioSource = audioContext.createMediaElementSource(video);
   audioSource.connect(audioContext.destination);
