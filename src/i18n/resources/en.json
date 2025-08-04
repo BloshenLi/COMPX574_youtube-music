@@ -746,6 +746,38 @@
         }
       }
     },
+    "quick-controls": {
+      "description": "Provides quick playback control menus for Dock/system tray right-click operations",
+      "name": "Quick Controls",
+      "controls": {
+        "play": "Play",
+        "pause": "Pause",
+        "previous": "Previous",
+        "next": "Next",
+        "like": "Like",
+        "shuffle": "Shuffle",
+        "shuffle-enabled": "Shuffle ✓",
+        "repeat-mode": "Repeat Mode"
+      },
+      "repeat": {
+        "off": "Repeat Off",
+        "one": "Repeat One",
+        "all": "Repeat All",
+        "label": {
+          "off": "Off",
+          "one": "One",
+          "all": "All"
+        }
+      },
+      "errors": {
+        "platform-not-supported": "Unsupported operating system platform",
+        "windows-not-implemented": "Windows platform support will be implemented in v0.2.0",
+        "linux-not-implemented": "Linux platform support will be implemented in v0.2.0"
+      },
+      "debug": {
+        "menu-label": "Debug Info"
+      }
+    },
     "shortcuts": {
       "description": "Allows setting global hotkeys for playback (play/pause/next/previous) and turning off media OSD by overriding media keys, turning on Ctrl/CMD + F to search, turning on Linux MPRIS support for media keys, and custom hotkeys for advanced users",
       "menu": {
