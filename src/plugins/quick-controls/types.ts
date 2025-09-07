@@ -7,17 +7,18 @@ export interface QuickControlsConfig {
   enabled: boolean;                    
   showPlaybackControls: boolean;       
   showLikeButton: boolean;            
-  showRepeatControl: boolean;         
-  showShuffleControl: boolean;        
+  showRepeatControl: boolean;
+  showShuffleControl: boolean;         // 显示随机播放控制
 }
 
 export interface PlayerState {
   isPlaying: boolean;                 
   isPaused: boolean;                  
-  shuffleEnabled: boolean;            
   repeatMode: RepeatMode;            
   canLike: boolean;                   
   hasCurrentSong: boolean;            
+  isLiked: boolean;                   // 当前歌曲是否被喜欢
+  isShuffled: boolean;                // 是否开启随机播放
 }
 
 export enum RepeatMode {
@@ -32,7 +33,8 @@ export interface MenuItemConfig {
   action: () => void;                 
   enabled?: boolean;                  
   checked?: boolean;                  
-  separator?: boolean;               
+  separator?: boolean;
+  submenu?: MenuItemConfig[];         // 支持子菜单
 }
 
 
@@ -99,7 +101,7 @@ export interface IMenuBuilder {
 
   buildPlaybackControls(state: PlayerState): Promise<MenuItemConfig[]>;
   
-  buildAdvancedControls(): Promise<MenuItemConfig[]>;
+  buildAdvancedControls(state: PlayerState): Promise<MenuItemConfig[]>;
   
   buildFullMenu(state: PlayerState, config: QuickControlsConfig): Promise<MenuItemConfig[]>;
 }

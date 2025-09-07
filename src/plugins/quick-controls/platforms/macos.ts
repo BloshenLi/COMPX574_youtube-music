@@ -137,7 +137,7 @@ export class MacOSController extends BasePlatformController {
 
   /**
    * 将通用菜单项配置转换为 Electron MenuItemConstructorOptions
-   * 处理 macOS 特定的菜单项属性和样式
+   * 处理 macOS 特定的菜单项属性和样式，包括子菜单支持
    */
   private convertToElectronMenuItem(item: MenuItemConfig): MenuItemConstructorOptions {
     if (item.separator) {
@@ -146,30 +146,49 @@ export class MacOSController extends BasePlatformController {
 
     const menuItem: MenuItemConstructorOptions = {
       label: item.label,
-      enabled: item.enabled !== false, 
-      click: () => {
+      enabled: item.enabled !== false
+    };
+
+    // 处理子菜单
+    if (item.submenu && item.submenu.length > 0) {
+      menuItem.submenu = item.submenu.map(subItem => this.convertToElectronMenuItem(subItem));
+    } else {
+      // 只有叶子节点才有点击事件
+      menuItem.click = () => {
         try {
           console.log(`[macOS] Executing menu item action: ${item.id}`);
           item.action();
         } catch (error) {
           console.error(`[macOS] Menu item action failed (${item.id}):`, error);
         }
-      }
-    };
+      };
+    }
 
+    // 设置菜单项类型
     if (item.checked !== undefined) {
-      menuItem.type = 'checkbox';
+      // Repeat 子项使用 radio
+      if (item.id?.startsWith('repeat-')) {
+        menuItem.type = 'radio';
+      } else if (item.id === 'shuffle') {
+        // Shuffle 使用 checkbox，并在文案前显示勾选
+        menuItem.type = 'checkbox';
+      }
       menuItem.checked = item.checked;
     }
 
-   
+    // 设置快捷键
     if (item.id) {
       switch (item.id) {
         case 'playPause':
+          menuItem.accelerator = 'Space';
           break;
           
         case 'previous':
+          menuItem.accelerator = 'Cmd+Left';
+          break;
+          
         case 'next':
+          menuItem.accelerator = 'Cmd+Right';
           break;
           
         case 'like':

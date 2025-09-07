@@ -88,8 +88,8 @@ export abstract class BasePlatformController implements IPlatformController {
 
       console.log(`[${this.getPlatformName()}] Player state updated:`, {
         isPlaying: state.isPlaying,
-        shuffleEnabled: state.shuffleEnabled,
-        repeatMode: state.repeatMode
+        repeatMode: state.repeatMode,
+        isShuffled: state.isShuffled
       });
 
       this.currentState = { ...state };
@@ -224,10 +224,11 @@ export abstract class BasePlatformController implements IPlatformController {
     return (
       this.currentState.isPlaying !== newState.isPlaying ||
       this.currentState.isPaused !== newState.isPaused ||
-      this.currentState.shuffleEnabled !== newState.shuffleEnabled ||
       this.currentState.repeatMode !== newState.repeatMode ||
       this.currentState.canLike !== newState.canLike ||
-      this.currentState.hasCurrentSong !== newState.hasCurrentSong
+      this.currentState.hasCurrentSong !== newState.hasCurrentSong ||
+      this.currentState.isLiked !== newState.isLiked ||
+      this.currentState.isShuffled !== newState.isShuffled
     );
   }
 

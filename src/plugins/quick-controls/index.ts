@@ -6,6 +6,7 @@
 import { createPlugin } from '@/utils';
 import { t } from '@/i18n';
 import { onBackendLoad } from './backend';
+import { renderer } from './renderer';
 
 import type { QuickControlsConfig } from './types';
 
@@ -21,14 +22,15 @@ export default createPlugin({
   restartNeeded: true,
 
   config: {
-    enabled: false,                     
+    enabled: true,                     
     showPlaybackControls: true,        
     showLikeButton: true,              
-    showRepeatControl: true,           
-    showShuffleControl: true,          
+    showRepeatControl: true,
+    showShuffleControl: true,          // 默认显示随机播放控制
   } as QuickControlsConfig,
 
   backend: onBackendLoad,
+  renderer: renderer,
 });
 
 export type { QuickControlsConfig } from './types';

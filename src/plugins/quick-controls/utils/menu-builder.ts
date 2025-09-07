@@ -14,6 +14,7 @@ import type {
   PlayerState, 
   QuickControlsConfig
 } from '../types';
+import { RepeatMode } from '../types';
 
 /**
  * 菜单构建器实现类
@@ -21,8 +22,10 @@ import type {
  */
 export class MenuBuilder implements IMenuBuilder {
   private songControls: ReturnType<typeof getSongControls>;
+  private window: BrowserWindow;
 
   constructor(window: BrowserWindow) {
+    this.window = window;
     this.songControls = getSongControls(window);
   }
 
@@ -66,7 +69,6 @@ export class MenuBuilder implements IMenuBuilder {
       return key;
       
     } catch (error) {
-      console.error(`[MenuBuilder] 获取系统文本失败:`, error);
       return key;
     }
   }
@@ -116,7 +118,7 @@ export class MenuBuilder implements IMenuBuilder {
       action: () => {
         this.songControls.previous();
       },
-      enabled: true
+      enabled: !state.isPaused // 暂停时禁用上一首
     });
 
  
@@ -134,9 +136,9 @@ export class MenuBuilder implements IMenuBuilder {
 
   /**
    * 构建高级控制菜单项  
-   * 包括喜欢按钮等高级功能
+   * 包括喜欢按钮、循环播放等高级功能
    */
-  async buildAdvancedControls(): Promise<MenuItemConfig[]> {
+  async buildAdvancedControls(state: PlayerState): Promise<MenuItemConfig[]> {
     const controls: MenuItemConfig[] = [];
 
     controls.push({
@@ -146,13 +148,124 @@ export class MenuBuilder implements IMenuBuilder {
       separator: true
     });
 
+    // 喜欢/取消喜欢按钮 - 根据当前状态动态切换
+    const likeLabel = state.isLiked 
+      ? await this.getSystemText('plugins.quick-controls.controls.unlike')
+      : await this.getSystemText('plugins.quick-controls.controls.like');
+    
     controls.push({
       id: 'like',
-      label: await this.getSystemText('plugins.quick-controls.controls.like'),
+      label: likeLabel,
       action: () => {
         this.songControls.like();
+        // like state refresh
+        setTimeout(() => {
+          this.requestLikeStateRefresh();
+        }, 300);
       },
-      enabled: true
+      enabled: state.canLike && state.hasCurrentSong
+    });
+
+
+    // 循环播放控制 - 带子菜单的设计
+    // 随机播放控制 - 使用原生 checkbox 勾选状态
+    controls.push({
+      id: 'shuffle',
+      label: await this.getSystemText('plugins.quick-controls.controls.shuffle'),
+      action: () => {
+        this.songControls.shuffle();
+        // 刷新状态
+        setTimeout(() => {
+          this.requestShuffleStateRefresh();
+        }, 800);
+      },
+      enabled: !state.isPaused, // 暂停时禁用随机播放
+      checked: state.isShuffled  // 用原生 checkbox 表示是否开启
+    });
+
+    // 循环播放控制 - 带子菜单的设计
+    controls.push({
+      id: 'repeat',
+      label: 'Repeat',
+      action: () => {}, 
+      enabled: !state.isPaused, // 暂停时禁用整个 repeat 菜单
+      submenu: [
+        {
+          id: 'repeat-off',
+          label: 'Off',
+          action: () => {
+            // 设置为关闭模式
+            if (state.repeatMode !== RepeatMode.OFF) {
+              // 正确的循环顺序：OFF → ALL → ONE → OFF
+              let switches = 0;
+              if (state.repeatMode === RepeatMode.ALL) {
+                switches = 2; // ALL → ONE → OFF
+              } else if (state.repeatMode === RepeatMode.ONE) {
+                switches = 1; // ONE → OFF
+              }
+              if (switches > 0) {
+                this.songControls.switchRepeat(switches);
+                // 刷新状态
+                setTimeout(() => {
+                  this.requestRepeatStateRefresh();
+                }, 800);
+              }
+            }
+          },
+          enabled: true,
+          checked: state.repeatMode === RepeatMode.OFF
+        },
+        {
+          id: 'repeat-one',
+          label: 'One',
+          action: () => {
+            // 设置为单曲循环
+            if (state.repeatMode !== RepeatMode.ONE) {
+              // 正确的循环顺序：OFF → ALL → ONE → OFF
+              let switches = 0;
+              if (state.repeatMode === RepeatMode.OFF) {
+                switches = 2; // OFF → ALL → ONE
+              } else if (state.repeatMode === RepeatMode.ALL) {
+                switches = 1; // ALL → ONE
+              }
+              if (switches > 0) {
+                this.songControls.switchRepeat(switches);
+                // 刷新状态
+                setTimeout(() => {
+                  this.requestRepeatStateRefresh();
+                }, 800);
+              }
+            }
+          },
+          enabled: true,
+          checked: state.repeatMode === RepeatMode.ONE
+        },
+        {
+          id: 'repeat-all',
+          label: 'All',
+          action: () => {
+            // 设置为列表循环
+            if (state.repeatMode !== RepeatMode.ALL) {
+              // 正确的循环顺序：OFF → ALL → ONE → OFF
+              let switches = 0;
+              if (state.repeatMode === RepeatMode.OFF) {
+                switches = 1; // OFF → ALL
+              } else if (state.repeatMode === RepeatMode.ONE) {
+                switches = 2; // ONE → OFF → ALL
+              }
+              if (switches > 0) {
+                this.songControls.switchRepeat(switches);
+                // 刷新状态
+                setTimeout(() => {
+                  this.requestRepeatStateRefresh();
+                }, 800);
+              }
+            }
+          },
+          enabled: true,
+          checked: state.repeatMode === RepeatMode.ALL
+        }
+      ]
     });
 
     return controls;
@@ -165,44 +278,91 @@ export class MenuBuilder implements IMenuBuilder {
   async buildFullMenu(state: PlayerState, config: QuickControlsConfig): Promise<MenuItemConfig[]> {
     const menuItems: MenuItemConfig[] = [];
 
+    // 添加播放控制菜单项
     if (config.showPlaybackControls) {
       const playbackControls = await this.buildPlaybackControls(state);
       menuItems.push(...playbackControls);
     }
 
-    const advancedItems: MenuItemConfig[] = [];
+    // 检查是否需要显示任何高级控制项
+    const needsAdvancedControls = config.showLikeButton || config.showRepeatControl || config.showShuffleControl;
     
-    if (config.showLikeButton) {
-      const advancedControls = await this.buildAdvancedControls();
- 
+    if (needsAdvancedControls) {
+      const advancedControls = await this.buildAdvancedControls(state);
+      
       for (const item of advancedControls) {
         switch (item.id) {
           case 'separator1':
-            advancedItems.push(item);
+            // 总是添加分隔符，如果有高级控制项
+            menuItems.push(item);
             break;
             
           case 'like':
             if (config.showLikeButton) {
-              advancedItems.push(item);
+              menuItems.push(item);
+            }
+            break;
+            
+          case 'shuffle':
+            if (config.showShuffleControl) {
+              menuItems.push(item);
+            }
+            break;
+            
+          case 'repeat':
+            if (config.showRepeatControl) {
+              menuItems.push(item);
             }
             break;
             
           default:
-            advancedItems.push(item);
+            menuItems.push(item);
             break;
         }
       }
     }
-
-    menuItems.push(...advancedItems);
 
     return menuItems;
   }
 
 
   /**
-   * 销毁菜单构建器，清理资源
+   * 请求前端刷新like状态
+   * 用于在菜单按钮点击后立即更新状态
    */
+  private requestLikeStateRefresh(): void {
+    try {
+      this.window.webContents.send('ytmd:refresh-like-status');
+    } catch (error) {
+      console.error('[MenuBuilder] Failed to request like state refresh:', error);
+    }
+  }
+
+  /**
+   * 请求前端刷新循环播放状态
+   * 用于在菜单按钮点击后立即更新状态
+   */
+  private requestRepeatStateRefresh(): void {
+    try {
+      this.window.webContents.send('ytmd:refresh-repeat-status');
+    } catch (error) {
+      console.error('[MenuBuilder] Failed to request repeat state refresh:', error);
+    }
+  }
+
+  /**
+   * 请求前端刷新随机播放状态
+   * 用于在菜单按钮点击后立即更新状态
+   */
+  private requestShuffleStateRefresh(): void {
+    try {
+      this.window.webContents.send('ytmd:refresh-shuffle-status');
+    } catch (error) {
+      console.error('[MenuBuilder] Failed to request shuffle state refresh:', error);
+    }
+  }
+
+  
   destroy(): void {
 
   }

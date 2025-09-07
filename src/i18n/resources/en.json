@@ -755,7 +755,10 @@
         "previous": "Previous",
         "next": "Next",
         "like": "Like",
+        "unlike": "Unlike",
         "shuffle": "Shuffle",
+        "shuffle-on": "Shuffle On",
+        "shuffle-off": "Shuffle Off",
         "shuffle-enabled": "Shuffle ✓",
         "repeat-mode": "Repeat Mode"
       },

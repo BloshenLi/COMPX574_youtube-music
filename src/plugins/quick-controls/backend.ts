@@ -31,7 +31,6 @@ export const onBackendLoad = async ({ getConfig, window }: BackendContext<QuickC
     const platformController = await getPlatformController();
   
     await platformController.initialize(window, config);
-  
     
   } catch (error) {
     throw error;

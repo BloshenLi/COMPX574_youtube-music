@@ -755,7 +755,10 @@
         "previous": "上一首",
         "next": "下一首",
         "like": "喜欢",
+        "unlike": "取消喜欢",
         "shuffle": "随机播放",
+        "shuffle-on": "开启随机播放",
+        "shuffle-off": "关闭随机播放",
         "shuffle-enabled": "随机播放 ✓",
         "repeat-mode": "循环模式"
       },
