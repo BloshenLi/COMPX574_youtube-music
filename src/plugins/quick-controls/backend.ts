@@ -12,9 +12,13 @@ const getPlatformController = async () => {
     
     const { MacOSController } = await import('./platforms/macos');
     return new MacOSController();
+  } else if (is.windows()) {
+    
+    const { WindowsController } = await import('./platforms/windows');
+    return new WindowsController();
   } else {
     
-    throw new Error('Windows  Linux');
+    throw new Error('Platform not supported. Only macOS and Windows are currently supported.');
   }
 };
 
