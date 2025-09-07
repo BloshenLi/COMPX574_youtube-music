@@ -457,6 +457,8 @@ export const mainMenuTemplate = async (
                     config.setMenuOption('options.language', lang);
                     refreshMenu(win);
                     setLanguage(lang);
+                    // 通知插件语言已更改
+                    win.webContents.send('ytmd:language-changed', lang);
                     dialog.showMessageBox(win, {
                       title: t(
                         'main.menu.options.submenu.language.dialog.title',

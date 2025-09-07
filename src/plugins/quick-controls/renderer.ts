@@ -50,6 +50,13 @@ export const renderer = createRenderer<{
       setTimeout(checkShuffleState, 500); // 等待DOM更新后再检测
     });
 
+    // 监听语言更改事件，刷新托盘菜单
+    ctx.ipc.on('ytmd:language-changed', (language: string) => {
+      console.log(`[Quick Controls] Language changed to: ${language}`);
+      // 通知后端刷新托盘菜单
+      ctx.ipc.send('ytmd:refresh-tray-menu');
+    });
+
     // 检测循环播放状态
     const checkRepeatState = () => {
       const repeatButton = document.querySelector('button[aria-label*="Repeat"]') as HTMLElement;

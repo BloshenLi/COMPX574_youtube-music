@@ -52,6 +52,11 @@ export class WindowsController extends BasePlatformController {
   
     this.menuBuilder = new MenuBuilder(this.window);
     
+    // 设置菜单刷新回调，用于语言更改时刷新托盘菜单
+    (this.stateManager as StateManager).setMenuRefreshCallback(() => {
+      this.refreshTrayMenu();
+    });
+    
     console.log('[Windows] Components initialization completed');
   }
 
@@ -284,15 +289,15 @@ export class WindowsController extends BasePlatformController {
    */
   async refreshTrayMenu(): Promise<void> {
     if (!this.isInitialized) {
-      console.warn('[Windows] 控制器未初始化，无法刷新托盘菜单');
+      console.warn('[Windows] Controller not initialized, cannot refresh tray menu');
       return;
     }
 
     try {
-      console.log('[Windows] 刷新系统托盘菜单');
+      console.log('[Windows] Refreshing system tray menu');
       await this.refreshMenu();
     } catch (error) {
-      console.error('[Windows] 刷新系统托盘菜单失败:', error);
+      console.error('[Windows] Failed to refresh system tray menu:', error);
     }
   }
 
@@ -309,7 +314,7 @@ export class WindowsController extends BasePlatformController {
    */
   updateTrayIcon(iconPath?: string): void {
     if (!this.tray) {
-      console.warn('[Windows] 托盘未初始化');
+      console.warn('[Windows] Tray not initialized');
       return;
     }
 
@@ -321,7 +326,7 @@ export class WindowsController extends BasePlatformController {
         this.tray.setImage(icon);
       }
     } catch (error) {
-      console.error('[Windows] 更新托盘图标失败:', error);
+      console.error('[Windows] Failed to update tray icon:', error);
     }
   }
 

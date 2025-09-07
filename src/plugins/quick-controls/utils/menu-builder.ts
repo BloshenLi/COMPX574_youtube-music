@@ -4,9 +4,8 @@
  */
 
 import type { BrowserWindow } from 'electron';
-import { app } from 'electron';
 import getSongControls from '@/providers/song-controls';
-import { languageResources } from 'virtual:i18n';
+import { t } from '@/i18n';
 
 import type { 
   IMenuBuilder, 
@@ -30,67 +29,13 @@ export class MenuBuilder implements IMenuBuilder {
   }
 
   /**
-   * 根据系统语言获取文本
-   * 直接使用系统语言设置，而不是应用语言配置
+   * 获取本地化文本
+   * 使用应用的i18n系统，跟随用户设置的语言
    */
-  private async getSystemText(key: string): Promise<string> {
-    try {
-      const systemLocale = app.getLocale();
-      
-      // 获取语言资源
-      const resources = await languageResources();
-      
-      // 尝试获取系统语言对应的文本
-      const localeResource = resources[systemLocale];
-      
-      if (localeResource) {
-        // 语言资源被包装在 translation 对象中
-        const translationData = localeResource.translation || localeResource;
-        
-        const text = this.getNestedProperty(translationData, key);
-        if (text) {
-          return text;
-        }
-      }
-      
-      // 回退到英文
-      const fallbackResource = resources['en'];
-      if (fallbackResource) {
-        // 英文资源也可能被包装在 translation 对象中
-        const translationData = fallbackResource.translation || fallbackResource;
-        
-        const text = this.getNestedProperty(translationData, key);
-        if (text) {
-          return text;
-        }
-      }
-      
-      // 最后回退到 key 本身
-      return key;
-      
-    } catch (error) {
-      return key;
-    }
+  private getLocalizedText(key: string): string {
+    return t(key);
   }
 
-  /**
-   * 从嵌套对象中获取属性值
-   * 例如: getNestedProperty(obj, 'plugins.quick-controls.controls.play')
-   */
-  private getNestedProperty(obj: any, path: string): string | null {
-    const keys = path.split('.');
-    let current = obj;
-    
-    for (const key of keys) {
-      if (current && typeof current === 'object' && key in current) {
-        current = current[key];
-      } else {
-        return null;
-      }
-    }
-    
-    return typeof current === 'string' ? current : null;
-  }
 
   /**
    * 构建播放控制菜单项
@@ -100,8 +45,8 @@ export class MenuBuilder implements IMenuBuilder {
     const controls: MenuItemConfig[] = [];
 
     const playPauseLabel = state.isPlaying 
-      ? await this.getSystemText('plugins.quick-controls.controls.pause')
-      : await this.getSystemText('plugins.quick-controls.controls.play');
+      ? this.getLocalizedText('plugins.quick-controls.controls.pause')
+      : this.getLocalizedText('plugins.quick-controls.controls.play');
     
     controls.push({
       id: 'playPause',
@@ -114,7 +59,7 @@ export class MenuBuilder implements IMenuBuilder {
 
     controls.push({
       id: 'previous',
-      label: await this.getSystemText('plugins.quick-controls.controls.previous'),
+      label: this.getLocalizedText('plugins.quick-controls.controls.previous'),
       action: () => {
         this.songControls.previous();
       },
@@ -124,7 +69,7 @@ export class MenuBuilder implements IMenuBuilder {
  
     controls.push({
       id: 'next',
-      label: await this.getSystemText('plugins.quick-controls.controls.next'),
+      label: this.getLocalizedText('plugins.quick-controls.controls.next'),
       action: () => {
         this.songControls.next();
       },
@@ -150,8 +95,8 @@ export class MenuBuilder implements IMenuBuilder {
 
     // 喜欢/取消喜欢按钮 - 根据当前状态动态切换
     const likeLabel = state.isLiked 
-      ? await this.getSystemText('plugins.quick-controls.controls.unlike')
-      : await this.getSystemText('plugins.quick-controls.controls.like');
+      ? this.getLocalizedText('plugins.quick-controls.controls.unlike')
+      : this.getLocalizedText('plugins.quick-controls.controls.like');
     
     controls.push({
       id: 'like',
@@ -171,7 +116,7 @@ export class MenuBuilder implements IMenuBuilder {
     // 随机播放控制 - 使用原生 checkbox 勾选状态
     controls.push({
       id: 'shuffle',
-      label: await this.getSystemText('plugins.quick-controls.controls.shuffle'),
+      label: this.getLocalizedText('plugins.quick-controls.controls.shuffle'),
       action: () => {
         this.songControls.shuffle();
         // 刷新状态
@@ -186,13 +131,13 @@ export class MenuBuilder implements IMenuBuilder {
     // 循环播放控制 - 带子菜单的设计
     controls.push({
       id: 'repeat',
-      label: 'Repeat',
+      label: this.getLocalizedText('plugins.quick-controls.controls.repeat-mode'),
       action: () => {}, 
       enabled: !state.isPaused, // 暂停时禁用整个 repeat 菜单
       submenu: [
         {
           id: 'repeat-off',
-          label: 'Off',
+          label: this.getLocalizedText('plugins.quick-controls.repeat.label.off'),
           action: () => {
             // 设置为关闭模式
             if (state.repeatMode !== RepeatMode.OFF) {
@@ -217,7 +162,7 @@ export class MenuBuilder implements IMenuBuilder {
         },
         {
           id: 'repeat-one',
-          label: 'One',
+          label: this.getLocalizedText('plugins.quick-controls.repeat.label.one'),
           action: () => {
             // 设置为单曲循环
             if (state.repeatMode !== RepeatMode.ONE) {
@@ -242,7 +187,7 @@ export class MenuBuilder implements IMenuBuilder {
         },
         {
           id: 'repeat-all',
-          label: 'All',
+          label: this.getLocalizedText('plugins.quick-controls.repeat.label.all'),
           action: () => {
             // 设置为列表循环
             if (state.repeatMode !== RepeatMode.ALL) {

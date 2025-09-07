@@ -24,6 +24,7 @@ export class StateManager implements IStateManager {
   private window: BrowserWindow;
   private repeatUpdateDebounceTimer: NodeJS.Timeout | null = null;
   private shuffleUpdateDebounceTimer: NodeJS.Timeout | null = null;
+  private menuRefreshCallback: (() => void) | null = null;
 
   constructor(window: BrowserWindow) {
     this.window = window;
@@ -31,6 +32,7 @@ export class StateManager implements IStateManager {
     this.setupSongInfoListener();
     this.setupRepeatListeners();
     this.setupShuffleListeners();
+    this.setupLanguageListener();
     
     // 启动后主动检测第一首歌的喜欢状态
     setTimeout(() => {
@@ -302,6 +304,28 @@ export class StateManager implements IStateManager {
   }
 
   /**
+   * 设置语言更改监听器
+   * 监听来自前端的语言更改事件并刷新菜单
+   */
+  private setupLanguageListener(): void {
+    // 监听托盘菜单刷新请求
+    ipcMain.on('ytmd:refresh-tray-menu', () => {
+      console.log('[StateManager] Received tray menu refresh request');
+      if (this.menuRefreshCallback) {
+        this.menuRefreshCallback();
+      }
+    });
+  }
+
+  /**
+   * 设置菜单刷新回调
+   * 用于在语言更改时刷新托盘菜单
+   */
+  setMenuRefreshCallback(callback: () => void): void {
+    this.menuRefreshCallback = callback;
+  }
+
+  /**
    * 销毁状态管理器，清理资源
    */
   destroy(): void {
@@ -321,6 +345,7 @@ export class StateManager implements IStateManager {
     ipcMain.removeAllListeners('ytmd:repeat-changed');
     ipcMain.removeAllListeners('ytmd:shuffle-changed');
     ipcMain.removeAllListeners('ytmd:like-status-changed');
+    ipcMain.removeAllListeners('ytmd:refresh-tray-menu');
 
     this.currentState = null;
     this.songInfoCallback = null;
