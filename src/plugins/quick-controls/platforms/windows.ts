@@ -85,12 +85,17 @@ export class WindowsController extends BasePlatformController {
     try {
       // 创建托盘图标 - 使用应用图标或默认图标
       const iconPath = this.getTrayIconPath();
+      console.log(`[DEBUG] 图标路径: ${iconPath}`);
+
       const icon = nativeImage.createFromPath(iconPath);
+      console.log(`[DEBUG] 图标是否为空: ${icon.isEmpty()}`);
+      console.log(`[DEBUG] 图标大小: ${JSON.stringify(icon.getSize())}`);
       
       if (icon.isEmpty()) {
-        console.warn('[Windows] Tray icon not found, using default');
-        // 如果找不到图标，创建一个简单的默认图标
-        const defaultIcon = nativeImage.createFromDataURL('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==');
+        console.warn('[Windows] Tray icon not found, creating default red YouTube Music icon');
+        // 创建一个红色圆形的 YouTube Music 图标作为默认
+        const defaultIconData = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAANxSURBVFhH7ZdLaBNBFIYnbYo1aqMiKCKIChYVwQcqvhBBUVBwIYILQVy4cOHChQsXLly4cOHChQsXLly4cOHChQsXLly4cOHChQsXLly4cOHChQsXLly4cOHChQsXLly4cOHChQsXLly4cOHChQsXLly4cOHChQsXLly4cOHChQsXLly4cOHChQsXLly4cOHChQsXLgRBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEAT/gP8ApFUjTwAAAABJRU5ErkJggg==';
+        const defaultIcon = nativeImage.createFromDataURL(defaultIconData);
         this.tray = new Tray(defaultIcon);
       } else {
         this.tray = new Tray(icon);
@@ -124,18 +129,40 @@ export class WindowsController extends BasePlatformController {
    * 尝试多个可能的图标位置
    */
   private getTrayIconPath(): string {
-    // 常见的应用图标路径
+    const fs = require('fs');
+
+    console.log(`[Windows] __dirname: ${__dirname}`);
+    console.log(`[Windows] process.cwd(): ${process.cwd()}`);
+
+    // 直接使用项目中已有的图标路径
     const possiblePaths = [
-      path.join(process.resourcesPath, 'app', 'assets', 'youtube-music.png'),
-      path.join(process.resourcesPath, 'assets', 'youtube-music.png'),
+      path.join(__dirname, '..', '..', '..', 'assets', 'youtube-music-tray.png'),
+      path.join(__dirname, '..', '..', '..', 'assets', 'generated', 'icons', 'win', 'icon.ico'),
       path.join(__dirname, '..', '..', '..', 'assets', 'youtube-music.png'),
-      path.join(__dirname, '..', '..', '..', 'assets', 'icon.png'),
+      path.join(process.cwd(), 'assets', 'youtube-music-tray.png'),
       path.join(process.cwd(), 'assets', 'youtube-music.png'),
-      path.join(process.cwd(), 'assets', 'icon.png'),
     ];
 
-    // 返回第一个存在的路径，或默认路径
-    return possiblePaths[0]; // 暂时返回第一个路径，后续可以添加文件存在性检查
+    console.log(`[Windows] Checking ${possiblePaths.length} possible icon paths:`);
+
+    // 返回第一个存在的路径
+    for (const iconPath of possiblePaths) {
+      try {
+        console.log(`[Windows] Checking path: ${iconPath}`);
+        if (fs.existsSync(iconPath)) {
+          console.log(`[Windows] ✅ Found tray icon at: ${iconPath}`);
+          return iconPath;
+        } else {
+          console.log(`[Windows] ❌ Path does not exist: ${iconPath}`);
+        }
+      } catch (error) {
+        console.warn(`[Windows] Error checking path ${iconPath}:`, error);
+      }
+    }
+
+    // 如果都找不到，返回第一个路径作为默认
+    console.warn('[Windows] ⚠️ No tray icon found, using default path');
+    return possiblePaths[0];
   }
 
   /**
