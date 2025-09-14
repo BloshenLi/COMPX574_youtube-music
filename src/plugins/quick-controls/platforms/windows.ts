@@ -85,11 +85,7 @@ export class WindowsController extends BasePlatformController {
     try {
       // 创建托盘图标 - 使用应用图标或默认图标
       const iconPath = this.getTrayIconPath();
-      console.log(`[DEBUG] 图标路径: ${iconPath}`);
-
       const icon = nativeImage.createFromPath(iconPath);
-      console.log(`[DEBUG] 图标是否为空: ${icon.isEmpty()}`);
-      console.log(`[DEBUG] 图标大小: ${JSON.stringify(icon.getSize())}`);
       
       if (icon.isEmpty()) {
         console.warn('[Windows] Tray icon not found, creating default red YouTube Music icon');
@@ -131,9 +127,6 @@ export class WindowsController extends BasePlatformController {
   private getTrayIconPath(): string {
     const fs = require('fs');
 
-    console.log(`[Windows] __dirname: ${__dirname}`);
-    console.log(`[Windows] process.cwd(): ${process.cwd()}`);
-
     // 直接使用项目中已有的图标路径
     const possiblePaths = [
       path.join(__dirname, '..', '..', '..', 'assets', 'youtube-music-tray.png'),
@@ -143,17 +136,11 @@ export class WindowsController extends BasePlatformController {
       path.join(process.cwd(), 'assets', 'youtube-music.png'),
     ];
 
-    console.log(`[Windows] Checking ${possiblePaths.length} possible icon paths:`);
-
     // 返回第一个存在的路径
     for (const iconPath of possiblePaths) {
       try {
-        console.log(`[Windows] Checking path: ${iconPath}`);
         if (fs.existsSync(iconPath)) {
-          console.log(`[Windows] ✅ Found tray icon at: ${iconPath}`);
           return iconPath;
-        } else {
-          console.log(`[Windows] ❌ Path does not exist: ${iconPath}`);
         }
       } catch (error) {
         console.warn(`[Windows] Error checking path ${iconPath}:`, error);
@@ -161,7 +148,7 @@ export class WindowsController extends BasePlatformController {
     }
 
     // 如果都找不到，返回第一个路径作为默认
-    console.warn('[Windows] ⚠️ No tray icon found, using default path');
+    console.warn('[Windows] No tray icon found, using default path');
     return possiblePaths[0];
   }
 

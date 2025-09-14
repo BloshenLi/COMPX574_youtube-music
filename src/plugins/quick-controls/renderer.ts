@@ -15,17 +15,37 @@ export const renderer = createRenderer<{
 
     // 检测并发送喜欢状态的通用函数
     const checkAndSendLikeStatus = (videoId?: string) => {
-      // 查找喜欢按钮
-      const likeButton = document.querySelector('button[aria-label="Like"]') as HTMLElement;
-      
+      // 尝试多种可能的喜欢按钮选择器
+      const possibleSelectors = [
+        'button[aria-label="Like"]',
+        'button[aria-label="喜欢"]',
+        'button[title="Like"]',
+        'button[title="喜欢"]',
+        'ytmusic-like-button-renderer button',
+        '#like-button button'
+      ];
+
+      let likeButton: HTMLElement | null = null;
+
+      for (const selector of possibleSelectors) {
+        likeButton = document.querySelector(selector) as HTMLElement;
+        if (likeButton) {
+          break;
+        }
+      }
+
       if (likeButton) {
         const ariaPressed = likeButton.getAttribute('aria-pressed');
         const isLiked = ariaPressed === 'true';
-        
+
+        console.log(`[Quick Controls] 检测到喜欢状态: ${isLiked} (videoId: ${videoId || 'current'})`);
+
         ctx.ipc.send('ytmd:like-status-changed', {
           videoId: videoId || 'current',
           isLiked: isLiked
         });
+      } else {
+        console.warn('[Quick Controls] 未找到喜欢按钮');
       }
     };
 
@@ -120,6 +140,58 @@ export const renderer = createRenderer<{
     // 页面加载后检测状态
     setTimeout(checkRepeatState, 3000);
     setTimeout(checkShuffleState, 3000);
+    setTimeout(checkAndSendLikeStatus, 3000); // 初始检测喜欢状态
+
+    // 设置喜欢按钮的监听器
+    const setupLikeButtonListener = () => {
+      const possibleSelectors = [
+        'button[aria-label="Like"]',
+        'button[aria-label="喜欢"]',
+        'button[title="Like"]',
+        'button[title="喜欢"]',
+        'ytmusic-like-button-renderer button',
+        '#like-button button'
+      ];
+
+      let likeButton: HTMLElement | null = null;
+
+      for (const selector of possibleSelectors) {
+        likeButton = document.querySelector(selector) as HTMLElement;
+        if (likeButton) {
+          break;
+        }
+      }
+
+      if (likeButton) {
+        console.log('[Quick Controls] 找到喜欢按钮，设置监听器');
+
+        // 使用 MutationObserver 监听按钮属性变化
+        const observer = new MutationObserver((mutations) => {
+          mutations.forEach((mutation) => {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'aria-pressed') {
+              console.log('[Quick Controls] 喜欢按钮状态变化');
+              // 状态发生变化，检测新状态并发送
+              setTimeout(() => checkAndSendLikeStatus(), 100);
+            }
+          });
+        });
+
+        observer.observe(likeButton, {
+          attributes: true,
+          attributeFilter: ['aria-pressed']
+        });
+
+        // 同时监听点击事件作为备用
+        likeButton.addEventListener('click', () => {
+          console.log('[Quick Controls] 喜欢按钮被点击');
+          setTimeout(() => checkAndSendLikeStatus(), 300);
+        });
+      } else {
+        // 如果按钮还没加载，稍后再试
+        console.log('[Quick Controls] 未找到喜欢按钮，1秒后重试');
+        setTimeout(setupLikeButtonListener, 1000);
+      }
+    };
 
     // 监听主界面重复播放按钮的点击事件
     const setupRepeatButtonListener = () => {
@@ -175,8 +247,9 @@ export const renderer = createRenderer<{
     };
 
     // 设置按钮监听器
+    setTimeout(setupLikeButtonListener, 3000);
     setTimeout(setupRepeatButtonListener, 3000);
-    
+
     // 启动 shuffle 状态检测，每 3 秒检查一次
     setTimeout(() => {
       checkShuffleStateChange(); // 初始检测
