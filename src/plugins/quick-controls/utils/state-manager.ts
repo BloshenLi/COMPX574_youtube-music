@@ -116,29 +116,42 @@ export class StateManager implements IStateManager {
       try {
         if (event === SongInfoEvent.PlayOrPaused || event === SongInfoEvent.VideoSrcChanged) {
           let isLiked = this.currentState?.isLiked || false;
-          
+
           // 当歌曲切换时，重置like状态，等待前端检测
           if (event === SongInfoEvent.VideoSrcChanged) {
-            isLiked = false; 
-            console.log(`[StateManager] Song changed to videoId: ${songInfo.videoId}, resetting like state`);
+            isLiked = false;
+            console.log(`[StateManager] 🎵 歌曲切换事件:`);
+            console.log(`[StateManager] 🎵 新歌曲: ${songInfo.title || 'Unknown'}`);
+            console.log(`[StateManager] 🎵 videoId: ${songInfo.videoId}`);
+            console.log(`[StateManager] 🎵 重置like状态为false，等待前端检测`);
+          } else {
+            console.log(`[StateManager] 🎵 播放状态变化: isPaused=${songInfo.isPaused}`);
           }
-          
+
           const newState: PlayerState = {
             isPlaying: !songInfo.isPaused,
             isPaused: !!songInfo.isPaused,
-            repeatMode: this.currentState?.repeatMode || RepeatMode.OFF,  
-            canLike: !!songInfo.title,  
+            repeatMode: this.currentState?.repeatMode || RepeatMode.OFF,
+            canLike: !!songInfo.title,
             hasCurrentSong: !!songInfo.title,
             isLiked: isLiked,
             isShuffled: this.currentState?.isShuffled || false
           };
-          
+
+          console.log(`[StateManager] 🎵 更新状态:`, {
+            songTitle: songInfo.title,
+            videoId: songInfo.videoId,
+            isLiked: newState.isLiked,
+            canLike: newState.canLike,
+            hasCurrentSong: newState.hasCurrentSong
+          });
+
           // 当歌曲切换时，获取新歌曲的like状态
           if (event === SongInfoEvent.VideoSrcChanged && songInfo.videoId) {
-            console.log(`[StateManager] 请求获取歌曲 ${songInfo.videoId} 的喜欢状态`);
+            console.log(`[StateManager] 🎵 请求获取新歌曲 ${songInfo.videoId} 的喜欢状态`);
             this.requestLikeStatus(songInfo.videoId);
           }
-          
+
           this.updateState(newState);
         }
       } catch (error) {
@@ -254,8 +267,17 @@ export class StateManager implements IStateManager {
     // 监听like状态变化
     ipcMain.on('ytmd:like-status-changed', (_, { videoId, isLiked }: { videoId: string; isLiked: boolean }) => {
       if (this.currentState) {
-        console.log(`[StateManager] Like status change for ${videoId}: ${isLiked}`);
-        
+        console.log(`[StateManager] 🎯 收到like状态变化:`);
+        console.log(`[StateManager] 🎯 videoId: ${videoId}`);
+        console.log(`[StateManager] 🎯 新状态: ${isLiked ? '❤️ 已喜欢' : '🤍 未喜欢'}`);
+        console.log(`[StateManager] 🎯 当前菜单状态: ${this.currentState.isLiked ? '❤️ 已喜欢' : '🤍 未喜欢'}`);
+
+        if (this.currentState.isLiked !== isLiked) {
+          console.log(`[StateManager] 🎯 状态确实发生变化，更新菜单...`);
+        } else {
+          console.log(`[StateManager] 🎯 状态没有变化，但仍然更新菜单确保同步`);
+        }
+
         const newState: PlayerState = {
           ...this.currentState,
           isLiked: isLiked,

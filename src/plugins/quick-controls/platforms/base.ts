@@ -81,21 +81,25 @@ export abstract class BasePlatformController implements IPlatformController {
   async updatePlayerState(state: PlayerState): Promise<void> {
     try {
       const hasStateChanged = this.hasPlayerStateChanged(state);
-      
+
       if (!hasStateChanged) {
+        console.log(`[${this.getPlatformName()}] No state change detected, skipping menu refresh`);
         return;
       }
 
       console.log(`[${this.getPlatformName()}] Player state updated:`, {
         isPlaying: state.isPlaying,
         repeatMode: state.repeatMode,
-        isShuffled: state.isShuffled
+        isShuffled: state.isShuffled,
+        isLiked: state.isLiked,
+        canLike: state.canLike,
+        hasCurrentSong: state.hasCurrentSong
       });
 
       this.currentState = { ...state };
-      
+
       await this.refreshMenu();
-      
+
     } catch (error) {
       console.error(`[${this.getPlatformName()}] State update failed:`, error);
     }
@@ -167,13 +171,19 @@ export abstract class BasePlatformController implements IPlatformController {
     }
 
     try {
-    
       const state = this.currentState || await this.getCurrentPlayerState();
-      
+
+      console.log(`[${this.getPlatformName()}] 刷新菜单，使用状态:`, {
+        isLiked: state.isLiked,
+        canLike: state.canLike,
+        hasCurrentSong: state.hasCurrentSong,
+        isPlaying: state.isPlaying
+      });
+
       const menuItems = await this.menuBuilder.buildFullMenu(state, this.config);
-      
+
       await this.createMenu(menuItems);
-      
+
     } catch (error) {
       console.error(`[${this.getPlatformName()}] Menu refresh failed:`, error);
     }

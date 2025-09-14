@@ -94,14 +94,19 @@ export class MenuBuilder implements IMenuBuilder {
     });
 
     // 喜欢/取消喜欢按钮 - 根据当前状态动态切换
-    const likeLabel = state.isLiked 
+    const likeLabel = state.isLiked
       ? this.getLocalizedText('plugins.quick-controls.controls.unlike')
       : this.getLocalizedText('plugins.quick-controls.controls.like');
-    
+
+    console.log(`[MenuBuilder] 🎯 构建Like菜单项:`);
+    console.log(`[MenuBuilder] 🎯 状态: isLiked=${state.isLiked}, canLike=${state.canLike}, hasCurrentSong=${state.hasCurrentSong}`);
+    console.log(`[MenuBuilder] 🎯 显示文本: "${likeLabel}" ${state.isLiked ? '❤️' : '🤍'}`);
+
     controls.push({
       id: 'like',
       label: likeLabel,
       action: () => {
+        console.log(`[MenuBuilder] Like菜单项被点击，当前状态: isLiked=${state.isLiked}`);
         this.songControls.like();
         // like state refresh
         setTimeout(() => {
