@@ -90,20 +90,8 @@ export const renderer = createRenderer<{
           isLiked = true;
         }
 
-        console.log(`[Quick Controls] 🎯 找到喜欢按钮 (videoId: ${videoId || 'current'}, 尝试: ${retryCount + 1})`);
-        console.log(`[Quick Controls] 🎯 按钮属性:`, {
-          ariaPressed,
-          ariaLabel,
-          title,
-          hasActiveClass,
-          buttonText: buttonText.substring(0, 50),
-          isLiked
-        });
-        console.log(`[Quick Controls] 🎯 检测结果: ${isLiked ? '❤️ 已喜欢' : '🤍 未喜欢'} (videoId: ${videoId || 'current'})`);
-
         // 如果检测到的状态可能不正确且还有重试次数，进行重试
         if (retryCount < 3 && ariaPressed === 'false' && retryCount > 0) {
-          console.log(`[Quick Controls] 🎯 状态可能未更新，${500 * (retryCount + 1)}ms后重试...`);
           setTimeout(() => {
             checkAndSendLikeStatus(videoId, retryCount + 1);
           }, 500 * (retryCount + 1));
@@ -118,27 +106,11 @@ export const renderer = createRenderer<{
         console.warn('[Quick Controls] 未找到喜欢按钮');
 
         // 调试：列出 ytmusic-like-button-renderer 中的所有按钮
-        if (likeButtonRenderer) {
-          const allButtons = likeButtonRenderer.querySelectorAll('button');
-          console.log(`[Quick Controls] ytmusic-like-button-renderer 中有 ${allButtons.length} 个按钮:`);
-
-          Array.from(allButtons).forEach((btn, index) => {
-            console.log(`[Quick Controls] 按钮 ${index + 1}:`, {
-              tagName: btn.tagName,
-              ariaLabel: btn.getAttribute('aria-label'),
-              title: btn.getAttribute('title'),
-              ariaPressed: btn.getAttribute('aria-pressed'),
-              className: btn.className
-            });
-          });
-        }
       }
     };
 
     // 监听后端请求获取喜欢状态
     ctx.ipc.on('ytmd:get-like-status', (videoId: string) => {
-      console.log(`[Quick Controls] 🎯 收到获取喜欢状态请求: ${videoId}`);
-      console.log(`[Quick Controls] 🎯 开始检测新歌曲的like状态...`);
       checkAndSendLikeStatus(videoId);
     });
 
@@ -188,7 +160,6 @@ export const renderer = createRenderer<{
       // 首先查找播放器区域
       const playerBar = document.querySelector('ytmusic-player-bar');
       let shuffleButton: HTMLElement | null = null;
-      let foundSelector = '';
 
       if (playerBar) {
         // 在播放器区域查找shuffle按钮，优先查找有aria-pressed属性的
@@ -208,7 +179,6 @@ export const renderer = createRenderer<{
             // 优先选择有aria-pressed属性的按钮
             if (candidate.hasAttribute('aria-pressed') || !shuffleButton) {
               shuffleButton = candidate;
-              foundSelector = selector;
               if (candidate.hasAttribute('aria-pressed')) {
                 break; // 找到有aria-pressed的，立即使用
               }
@@ -230,7 +200,6 @@ export const renderer = createRenderer<{
         for (const selector of fallbackSelectors) {
           shuffleButton = document.querySelector(selector) as HTMLElement;
           if (shuffleButton) {
-            foundSelector = `(fallback) ${selector}`;
             break;
           }
         }
@@ -239,7 +208,6 @@ export const renderer = createRenderer<{
       if (shuffleButton) {
         const ariaPressed = shuffleButton.getAttribute('aria-pressed');
         const ariaLabel = shuffleButton.getAttribute('aria-label') || '';
-        const title = shuffleButton.getAttribute('title') || '';
 
         // 多重状态检测
         let isShuffled = false;
@@ -279,38 +247,11 @@ export const renderer = createRenderer<{
           }
         }
 
-        console.log(`[Quick Controls] 找到随机播放按钮 (${foundSelector})`);
-        console.log(`[Quick Controls] 随机播放按钮属性:`, {
-          ariaPressed,
-          ariaLabel,
-          title,
-          className: shuffleButton.className,
-          isShuffled
-        });
 
         ctx.ipc.send('ytmd:shuffle-changed', isShuffled);
       } else {
         console.warn('[Quick Controls] 未找到随机播放按钮');
 
-        // 调试：列出播放器区域的所有按钮
-        if (playerBar) {
-          const allButtons = playerBar.querySelectorAll('button');
-          console.log(`[Quick Controls] ytmusic-player-bar 中有 ${allButtons.length} 个按钮:`);
-
-          Array.from(allButtons).forEach((btn, index) => {
-            const label = btn.getAttribute('aria-label') || '';
-            const title = btn.getAttribute('title') || '';
-            if (label.toLowerCase().includes('shuffle') || label.includes('随机') ||
-                title.toLowerCase().includes('shuffle') || title.includes('随机')) {
-              console.log(`[Quick Controls] 随机播放相关按钮 ${index + 1}:`, {
-                ariaLabel: label,
-                title: title,
-                ariaPressed: btn.getAttribute('aria-pressed'),
-                className: btn.className
-              });
-            }
-          });
-        }
       }
     };
 
@@ -325,7 +266,6 @@ export const renderer = createRenderer<{
       const likeButtonRenderer = document.querySelector('ytmusic-like-button-renderer');
 
       if (!likeButtonRenderer) {
-        console.log('[Quick Controls] 监听器设置: 未找到 ytmusic-like-button-renderer，1秒后重试');
         setTimeout(setupLikeButtonListener, 1000);
         return;
       }
@@ -349,7 +289,6 @@ export const renderer = createRenderer<{
 
       // 如果还是没找到，尝试更广泛的搜索（与checkAndSendLikeStatus保持一致）
       if (!likeButton) {
-        console.log('[Quick Controls] 监听器设置: 在renderer中未找到，尝试广泛搜索');
         const possibleSelectors = [
           'button[aria-label="Like"]',
           'button[aria-label="喜欢"]',
@@ -362,16 +301,12 @@ export const renderer = createRenderer<{
         for (const selector of possibleSelectors) {
           likeButton = document.querySelector(selector) as HTMLElement;
           if (likeButton) {
-            console.log(`[Quick Controls] 监听器设置: 通过备用选择器找到按钮: ${selector}`);
             break;
           }
         }
       }
 
       if (likeButton) {
-        console.log(`[Quick Controls] 监听器设置: 找到喜欢按钮，设置监听器`);
-        console.log(`[Quick Controls] 监听器设置: 按钮标签: "${likeButton.getAttribute('aria-label')}"`);
-
         // 使用 MutationObserver 监听按钮属性变化
         const observer = new MutationObserver((mutations) => {
           mutations.forEach((mutation) => {
@@ -379,11 +314,8 @@ export const renderer = createRenderer<{
                 (mutation.attributeName === 'aria-pressed' ||
                  mutation.attributeName === 'aria-label' ||
                  mutation.attributeName === 'class')) {
-              console.log('[Quick Controls] 喜欢按钮状态变化 (属性: ' + mutation.attributeName + ')');
-              console.log('[Quick Controls] MutationObserver检测到变化，检测新状态...');
               // 状态发生变化，检测新状态并发送
               setTimeout(() => {
-                console.log('[Quick Controls] MutationObserver延迟检测开始');
                 checkAndSendLikeStatus();
               }, 200);
             }
@@ -397,11 +329,9 @@ export const renderer = createRenderer<{
 
         // 同时监听点击事件作为备用
         likeButton.addEventListener('click', () => {
-          console.log('[Quick Controls] 喜欢按钮被点击');
-          console.log('[Quick Controls] 等待DOM更新后检测状态...');
+          console.log('[Quick Controls] 主界面喜欢按钮被点击，将更新菜单栏文案');
           // 增加延迟，等待YouTube Music更新DOM
           setTimeout(() => {
-            console.log('[Quick Controls] 开始检测点击后的状态');
             checkAndSendLikeStatus(undefined, 1); // 从重试1开始，因为这是点击后的检测
           }, 800); // 从300ms增加到800ms
         });
@@ -411,7 +341,6 @@ export const renderer = createRenderer<{
           const rendererObserver = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
               if (mutation.type === 'childList') {
-                console.log('[Quick Controls] ytmusic-like-button-renderer 内容变化，重新设置监听器');
                 setTimeout(setupLikeButtonListener, 500);
               }
             });
@@ -424,17 +353,6 @@ export const renderer = createRenderer<{
         }
       } else {
         // 如果按钮还没加载，稍后再试
-        console.log('[Quick Controls] 监听器设置: 未找到喜欢按钮，1秒后重试');
-
-        // 调试：列出所有找到的按钮
-        if (likeButtonRenderer) {
-          const allButtons = likeButtonRenderer.querySelectorAll('button');
-          console.log(`[Quick Controls] 监听器设置: ytmusic-like-button-renderer 中有 ${allButtons.length} 个按钮:`);
-          Array.from(allButtons).forEach((btn, index) => {
-            console.log(`[Quick Controls] 监听器设置: 按钮 ${index + 1}: "${btn.getAttribute('aria-label')}" (aria-pressed: ${btn.getAttribute('aria-pressed')})`);
-          });
-        }
-
         setTimeout(setupLikeButtonListener, 1000);
       }
     };
@@ -523,7 +441,6 @@ export const renderer = createRenderer<{
 
         // 只在状态真的改变时发送消息
         if (lastKnownShuffleState !== null && lastKnownShuffleState !== currentState) {
-          console.log(`[Quick Controls] Shuffle状态变化检测: ${lastKnownShuffleState} -> ${currentState}`);
           ctx.ipc.send('ytmd:shuffle-changed', currentState);
         }
         lastKnownShuffleState = currentState;

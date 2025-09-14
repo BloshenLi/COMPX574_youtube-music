@@ -120,12 +120,6 @@ export class StateManager implements IStateManager {
           // 当歌曲切换时，重置like状态，等待前端检测
           if (event === SongInfoEvent.VideoSrcChanged) {
             isLiked = false;
-            console.log(`[StateManager] 🎵 歌曲切换事件:`);
-            console.log(`[StateManager] 🎵 新歌曲: ${songInfo.title || 'Unknown'}`);
-            console.log(`[StateManager] 🎵 videoId: ${songInfo.videoId}`);
-            console.log(`[StateManager] 🎵 重置like状态为false，等待前端检测`);
-          } else {
-            console.log(`[StateManager] 🎵 播放状态变化: isPaused=${songInfo.isPaused}`);
           }
 
           const newState: PlayerState = {
@@ -138,17 +132,8 @@ export class StateManager implements IStateManager {
             isShuffled: this.currentState?.isShuffled || false
           };
 
-          console.log(`[StateManager] 🎵 更新状态:`, {
-            songTitle: songInfo.title,
-            videoId: songInfo.videoId,
-            isLiked: newState.isLiked,
-            canLike: newState.canLike,
-            hasCurrentSong: newState.hasCurrentSong
-          });
-
           // 当歌曲切换时，获取新歌曲的like状态
           if (event === SongInfoEvent.VideoSrcChanged && songInfo.videoId) {
-            console.log(`[StateManager] 🎵 请求获取新歌曲 ${songInfo.videoId} 的喜欢状态`);
             this.requestLikeStatus(songInfo.videoId);
           }
 
@@ -240,9 +225,6 @@ export class StateManager implements IStateManager {
             break;
         }
 
-        // 调试日志
-        console.log(`[StateManager] Repeat mode change: ${this.currentState.repeatMode} -> ${mode} (raw: ${repeatMode})`);
-
         // 使用防抖处理，避免频繁的状态更新干扰菜单显示
         if (this.repeatUpdateDebounceTimer) {
           clearTimeout(this.repeatUpdateDebounceTimer);
@@ -250,14 +232,11 @@ export class StateManager implements IStateManager {
 
         this.repeatUpdateDebounceTimer = setTimeout(() => {
           if (this.currentState && this.currentState.repeatMode !== mode) {
-            console.log(`[StateManager] Debounced update: repeat mode from ${this.currentState.repeatMode} to ${mode}`);
             const newState: PlayerState = {
               ...this.currentState,
               repeatMode: mode,
             };
             this.updateState(newState);
-          } else {
-            console.log(`[StateManager] Debounced ignore: duplicate repeat mode update: ${mode}`);
           }
           this.repeatUpdateDebounceTimer = null;
         }, 500); // 500ms 防抖延迟
@@ -267,22 +246,14 @@ export class StateManager implements IStateManager {
     // 监听like状态变化
     ipcMain.on('ytmd:like-status-changed', (_, { videoId, isLiked }: { videoId: string; isLiked: boolean }) => {
       if (this.currentState) {
-        console.log(`[StateManager] 🎯 收到like状态变化:`);
-        console.log(`[StateManager] 🎯 videoId: ${videoId}`);
-        console.log(`[StateManager] 🎯 新状态: ${isLiked ? '❤️ 已喜欢' : '🤍 未喜欢'}`);
-        console.log(`[StateManager] 🎯 当前菜单状态: ${this.currentState.isLiked ? '❤️ 已喜欢' : '🤍 未喜欢'}`);
-
+        // 只在状态真的变化时更新
         if (this.currentState.isLiked !== isLiked) {
-          console.log(`[StateManager] 🎯 状态确实发生变化，更新菜单...`);
-        } else {
-          console.log(`[StateManager] 🎯 状态没有变化，但仍然更新菜单确保同步`);
+          const newState: PlayerState = {
+            ...this.currentState,
+            isLiked: isLiked,
+          };
+          this.updateState(newState);
         }
-
-        const newState: PlayerState = {
-          ...this.currentState,
-          isLiked: isLiked,
-        };
-        this.updateState(newState);
       }
     });
 
