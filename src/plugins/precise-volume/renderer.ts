@@ -87,6 +87,7 @@ export const onPlayerApiReady = async (
         'beforeend',
         `<span id="volumeHud" style="${position + mainStyle}"></span>`,
       );
+
     } else {
       const position = 'top: 10px; left: 10px;';
       const mainStyle =

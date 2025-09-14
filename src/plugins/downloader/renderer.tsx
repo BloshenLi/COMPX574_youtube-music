@@ -32,6 +32,12 @@ const menuObserver = new MutationObserver(() => {
   }
 
   menu.prepend(buttonContainer);
+
+  // setTimeout(() => {
+  //   if (buttonContainer && !menu.querySelector('#ytmcustom-download')) {
+  //     menu.prepend(buttonContainer);
+  //   }
+  // }, 200);
 });
 
 export const onRendererLoad = ({
@@ -97,6 +103,7 @@ export const onPlayerApiReady = () => {
   buttonContainer.setAttribute('aria-selected', 'false');
   buttonContainer.setAttribute('role', 'option');
   buttonContainer.setAttribute('tabindex', '-1');
+  // buttonContainer.id = 'ytmcustom-download';
 
   render(
     () => <DownloadButton onClick={download} text={downloadButtonText()} />,

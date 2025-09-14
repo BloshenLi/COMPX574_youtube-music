@@ -24,6 +24,7 @@ import { cacheNoArgs } from '@/providers/decorators';
 import type { RendererContext } from '@/types/contexts';
 import type { InAppMenuConfig } from '../constants';
 
+
 const titleStyle = cacheNoArgs(
   () => css`
     -webkit-app-region: drag;
@@ -104,6 +105,28 @@ const animationStyle = cacheNoArgs(() => ({
     transition: all 0.00000000001s;
   `,
 }));
+
+let dragMask: HTMLDivElement | null = null;
+
+/** when the dropdown menu is opened, call this function */
+function disableDrag() {
+  const navBar = document.querySelector<HTMLElement>('ytmusic-nav-bar');
+  if (!navBar) return;
+
+  
+  if (!dragMask) {
+    dragMask = document.createElement('div');
+    dragMask.className = 'drag-mask';
+  }
+
+  navBar.style.position = 'relative';
+  navBar.appendChild(dragMask);
+}
+
+/** when the dropdown menu is closed, call this function */
+function enableDrag() {
+  dragMask?.remove();
+}
 
 export type PanelRendererProps = {
   items: Electron.Menu['items'];
@@ -190,6 +213,11 @@ export const TitleBar = (props: TitleBarProps) => {
   const [openTarget, setOpenTarget] = createSignal<HTMLElement | null>(null);
   const [menu, setMenu] = createSignal<Menu | null>(null);
   const [mouseY, setMouseY] = createSignal(0);
+
+  // subscribe to changes in the value of openTarget
+  createEffect(() => {
+    openTarget() ? disableDrag() : enableDrag();
+  });
 
   const [data, { refetch }] = createResource(
     async () => (await props.ipc.invoke('get-menu')) as Promise<Menu | null>,
@@ -281,14 +309,18 @@ export const TitleBar = (props: TitleBarProps) => {
       setIgnoreTransition(false);
     });
     props.ipc.on('toggle-in-app-menu', () => {
-      setCollapsed(!collapsed());
+      const next = !collapsed();
+      setCollapsed(next);
+  
     });
 
     props.ipc.on('window-maximize', refetchMaximize);
     props.ipc.on('window-unmaximize', refetchMaximize);
 
+
     // close menu when the outside of the panel or sub-panel is clicked
     document.body.addEventListener('click', (e) => {
+      console.log("click", e.target);
       if (
         e.target instanceof HTMLElement &&
         !(
@@ -299,6 +331,7 @@ export const TitleBar = (props: TitleBarProps) => {
         setOpenTarget(null);
       }
     });
+
 
     // tracking mouse position
     window.addEventListener('mousemove', listener);
