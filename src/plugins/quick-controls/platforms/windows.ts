@@ -159,6 +159,12 @@ export class WindowsController extends BasePlatformController {
   protected async platformSpecificCreateMenu(items: MenuItemConfig[]): Promise<void> {
     try {
       console.log(`[Windows] Creating tray menu with ${items.length} menu items`);
+
+      // Debug: Print key menu item states
+      const likeItem = items.find(item => item.id === 'like');
+      if (likeItem) {
+        console.log(`[Windows] Like button state: enabled=${likeItem.enabled}, label="${likeItem.label}"`);
+      }
       
       // 将通用菜单项配置转换为 Electron MenuItemConstructorOptions
       const menuTemplate: MenuItemConstructorOptions[] = items.map(item => 

@@ -96,6 +96,12 @@ export abstract class BasePlatformController implements IPlatformController {
         hasCurrentSong: state.hasCurrentSong
       });
 
+      console.log(`[${this.getPlatformName()}] Previous state:`, this.currentState ? {
+        isLiked: this.currentState.isLiked,
+        canLike: this.currentState.canLike,
+        hasCurrentSong: this.currentState.hasCurrentSong
+      } : 'null');
+
       this.currentState = { ...state };
 
       await this.refreshMenu();
@@ -173,7 +179,7 @@ export abstract class BasePlatformController implements IPlatformController {
     try {
       const state = this.currentState || await this.getCurrentPlayerState();
 
-      console.log(`[${this.getPlatformName()}] 刷新菜单，使用状态:`, {
+      console.log(`[${this.getPlatformName()}] Refreshing menu with state:`, {
         isLiked: state.isLiked,
         canLike: state.canLike,
         hasCurrentSong: state.hasCurrentSong,

@@ -76,18 +76,28 @@ export const renderer = createRenderer<{
         // 综合判断喜欢状态
         let isLiked = false;
 
+        console.log(`[Quick Controls] Button state detection: ariaPressed=${ariaPressed}, ariaLabel="${ariaLabel}", title="${title}", hasActiveClass=${hasActiveClass}`);
+
         if (ariaPressed === 'true') {
           isLiked = true;
+          console.log('[Quick Controls] Detected liked state from aria-pressed=true');
         } else if (ariaPressed === 'false') {
           isLiked = false;
+          console.log('[Quick Controls] Detected not liked state from aria-pressed=false');
         } else if (hasActiveClass) {
           isLiked = true;
+          console.log('[Quick Controls] Detected liked state from active CSS class');
         } else if (ariaLabel.toLowerCase().includes('unlike') || ariaLabel.includes('取消喜欢')) {
           isLiked = true;
+          console.log('[Quick Controls] Detected liked state from "unlike" in aria-label');
         } else if (title.toLowerCase().includes('unlike') || title.includes('取消喜欢')) {
           isLiked = true;
+          console.log('[Quick Controls] Detected liked state from "unlike" in title');
         } else if (buttonText.toLowerCase().includes('unlike') || buttonText.includes('取消喜欢')) {
           isLiked = true;
+          console.log('[Quick Controls] Detected liked state from "unlike" in button text');
+        } else {
+          console.log('[Quick Controls] No liked state indicators found, defaulting to not liked');
         }
 
         // 如果检测到的状态可能不正确且还有重试次数，进行重试
@@ -98,6 +108,7 @@ export const renderer = createRenderer<{
           return;
         }
 
+        console.log(`[Quick Controls] Sending like status: videoId=${videoId || 'current'}, isLiked=${isLiked}`);
         ctx.ipc.send('ytmd:like-status-changed', {
           videoId: videoId || 'current',
           isLiked: isLiked
@@ -111,7 +122,14 @@ export const renderer = createRenderer<{
 
     // 监听后端请求获取喜欢状态
     ctx.ipc.on('ytmd:get-like-status', (videoId: string) => {
+      console.log(`[Quick Controls] Received get-like-status request for videoId: ${videoId}`);
       checkAndSendLikeStatus(videoId);
+
+      // 当收到新歌曲的like状态请求时，重新设置按钮监听器
+      if (videoId && videoId !== 'startup') {
+        console.log('[Quick Controls] Song changed, re-setting up like button listener');
+        setTimeout(setupLikeButtonListener, 1000); // 延迟1秒确保DOM更新
+      }
     });
 
     // 监听后端请求刷新喜欢状态（在用户点击菜单按钮后）
@@ -260,8 +278,23 @@ export const renderer = createRenderer<{
     setTimeout(checkShuffleState, 3000);
     setTimeout(checkAndSendLikeStatus, 3000); // 初始检测喜欢状态
 
+    // 用于存储当前的监听器，方便清理
+    let currentLikeButtonObserver: MutationObserver | null = null;
+    let currentRendererObserver: MutationObserver | null = null;
+
     // 设置喜欢按钮的监听器
     const setupLikeButtonListener = () => {
+      // 清理之前的监听器
+      if (currentLikeButtonObserver) {
+        currentLikeButtonObserver.disconnect();
+        currentLikeButtonObserver = null;
+      }
+      if (currentRendererObserver) {
+        currentRendererObserver.disconnect();
+        currentRendererObserver = null;
+      }
+
+      console.log('[Quick Controls] Setting up like button listener...');
       // 使用与checkAndSendLikeStatus完全相同的逻辑
       const likeButtonRenderer = document.querySelector('ytmusic-like-button-renderer');
 
@@ -308,7 +341,7 @@ export const renderer = createRenderer<{
 
       if (likeButton) {
         // 使用 MutationObserver 监听按钮属性变化
-        const observer = new MutationObserver((mutations) => {
+        currentLikeButtonObserver = new MutationObserver((mutations) => {
           mutations.forEach((mutation) => {
             if (mutation.type === 'attributes' &&
                 (mutation.attributeName === 'aria-pressed' ||
@@ -322,35 +355,39 @@ export const renderer = createRenderer<{
           });
         });
 
-        observer.observe(likeButton, {
+        currentLikeButtonObserver.observe(likeButton, {
           attributes: true,
           attributeFilter: ['aria-pressed', 'aria-label', 'class']
         });
 
         // 同时监听点击事件作为备用
         likeButton.addEventListener('click', () => {
-          console.log('[Quick Controls] 主界面喜欢按钮被点击，将更新菜单栏文案');
+          console.log('[Quick Controls] Like button clicked, will update menu text');
           // 增加延迟，等待YouTube Music更新DOM
           setTimeout(() => {
+            console.log('[Quick Controls] Checking like status after click...');
             checkAndSendLikeStatus(undefined, 1); // 从重试1开始，因为这是点击后的检测
           }, 800); // 从300ms增加到800ms
         });
 
         // 监听整个 ytmusic-like-button-renderer 的变化，防止按钮被重新渲染
         if (likeButtonRenderer) {
-          const rendererObserver = new MutationObserver((mutations) => {
+          currentRendererObserver = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
               if (mutation.type === 'childList') {
+                console.log('[Quick Controls] Like button renderer changed, re-setting up listener');
                 setTimeout(setupLikeButtonListener, 500);
               }
             });
           });
 
-          rendererObserver.observe(likeButtonRenderer, {
+          currentRendererObserver.observe(likeButtonRenderer, {
             childList: true,
             subtree: true
           });
         }
+
+        console.log('[Quick Controls] Like button listener setup completed');
       } else {
         // 如果按钮还没加载，稍后再试
         setTimeout(setupLikeButtonListener, 1000);
