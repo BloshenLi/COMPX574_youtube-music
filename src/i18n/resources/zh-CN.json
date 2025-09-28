@@ -774,11 +774,17 @@
       },
       "errors": {
         "platform-not-supported": "不支持的操作系统平台",
-        "windows-not-implemented": "Windows 平台支持将在 v0.2.0 版本中实现",
-        "linux-not-implemented": "Linux 平台支持将在 v0.2.0 版本中实现"
+        "initialization-failed": "初始化平台控制器失败",
+        "menu-creation-failed": "创建控制菜单失败"
       },
       "debug": {
         "menu-label": "调试信息"
+      },
+      "platform": {
+        "show-window": "显示 YouTube Music",
+        "hide-window": "隐藏 YouTube Music",
+        "exit": "退出",
+        "tray-tooltip": "YouTube Music - 快速控制"
       }
     },
     "shortcuts": {

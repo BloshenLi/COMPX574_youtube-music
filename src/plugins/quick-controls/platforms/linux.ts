@@ -7,6 +7,7 @@
 import { app, Menu, Tray, nativeImage, type MenuItemConstructorOptions } from 'electron';
 import is from 'electron-is';
 import * as path from 'path';
+import { t } from '@/i18n';
 
 import { BasePlatformController } from './base';
 import { StateManager } from '../utils/state-manager';
@@ -99,7 +100,7 @@ export class LinuxController extends BasePlatformController {
       }
 
       // 设置托盘提示文字
-      this.tray.setToolTip('YouTube Music - Quick Controls');
+      this.tray.setToolTip(t('plugins.quick-controls.platform.tray-tooltip') || 'YouTube Music - Quick Controls');
 
       // 设置双击事件 - 显示/隐藏主窗口
       this.tray.on('double-click', () => {
@@ -187,7 +188,7 @@ export class LinuxController extends BasePlatformController {
       menuTemplate.push(
         { type: 'separator' },
         {
-          label: 'Show YouTube Music',
+          label: t('plugins.quick-controls.platform.show-window') || 'Show YouTube Music',
           click: () => {
             if (this.window) {
               this.window.show();
@@ -196,7 +197,7 @@ export class LinuxController extends BasePlatformController {
           }
         },
         {
-          label: 'Exit',
+          label: t('plugins.quick-controls.platform.exit') || 'Exit',
           click: () => {
             app.quit();
           }

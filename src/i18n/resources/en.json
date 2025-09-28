@@ -774,11 +774,17 @@
       },
       "errors": {
         "platform-not-supported": "Unsupported operating system platform",
-        "windows-not-implemented": "Windows platform support will be implemented in v0.2.0",
-        "linux-not-implemented": "Linux platform support will be implemented in v0.2.0"
+        "initialization-failed": "Failed to initialize platform controller",
+        "menu-creation-failed": "Failed to create control menu"
       },
       "debug": {
         "menu-label": "Debug Info"
+      },
+      "platform": {
+        "show-window": "Show YouTube Music",
+        "hide-window": "Hide YouTube Music",
+        "exit": "Exit",
+        "tray-tooltip": "YouTube Music - Quick Controls"
       }
     },
     "shortcuts": {
