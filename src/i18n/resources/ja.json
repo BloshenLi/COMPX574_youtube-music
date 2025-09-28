@@ -692,6 +692,47 @@
         }
       }
     },
+    "quick-controls": {
+      "description": "Dock/システムトレイの右クリック操作でクイック再生制御メニューを提供します",
+      "name": "クイックコントロール",
+      "controls": {
+        "play": "再生",
+        "pause": "一時停止",
+        "previous": "前へ",
+        "next": "次へ",
+        "like": "いいね",
+        "unlike": "いいねを取り消す",
+        "shuffle": "シャッフル",
+        "shuffle-on": "シャッフル オン",
+        "shuffle-off": "シャッフル オフ",
+        "shuffle-enabled": "シャッフル ✓",
+        "repeat-mode": "リピートモード"
+      },
+      "repeat": {
+        "off": "リピート オフ",
+        "one": "1曲リピート",
+        "all": "全曲リピート",
+        "label": {
+          "off": "オフ",
+          "one": "1曲",
+          "all": "全曲"
+        }
+      },
+      "errors": {
+        "platform-not-supported": "サポートされていないOSプラットフォーム",
+        "initialization-failed": "プラットフォームコントローラーの初期化に失敗しました",
+        "menu-creation-failed": "コントロールメニューの作成に失敗しました"
+      },
+      "debug": {
+        "menu-label": "デバッグ情報"
+      },
+      "platform": {
+        "show-window": "YouTube Music を表示",
+        "hide-window": "YouTube Music を非表示",
+        "exit": "終了",
+        "tray-tooltip": "YouTube Music - クイックコントロール"
+      }
+    },
     "quality-changer": {
       "backend": {
         "dialog": {

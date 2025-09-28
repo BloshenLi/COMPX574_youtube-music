@@ -694,6 +694,47 @@
         }
       }
     },
+    "quick-controls": {
+      "description": "Dock/시스템 트레이 우클릭 작업을 위한 빠른 재생 제어 메뉴를 제공합니다",
+      "name": "빠른 제어",
+      "controls": {
+        "play": "재생",
+        "pause": "일시정지",
+        "previous": "이전",
+        "next": "다음",
+        "like": "좋아요",
+        "unlike": "좋아요 취소",
+        "shuffle": "셔플",
+        "shuffle-on": "셔플 켜기",
+        "shuffle-off": "셔플 끄기",
+        "shuffle-enabled": "셔플 ✓",
+        "repeat-mode": "반복 모드"
+      },
+      "repeat": {
+        "off": "반복 끄기",
+        "one": "한 곡 반복",
+        "all": "전체 반복",
+        "label": {
+          "off": "끄기",
+          "one": "한 곡",
+          "all": "전체"
+        }
+      },
+      "errors": {
+        "platform-not-supported": "지원되지 않는 운영 체제 플랫폼",
+        "initialization-failed": "플랫폼 컨트롤러 초기화 실패",
+        "menu-creation-failed": "제어 메뉴 생성 실패"
+      },
+      "debug": {
+        "menu-label": "디버그 정보"
+      },
+      "platform": {
+        "show-window": "YouTube Music 표시",
+        "hide-window": "YouTube Music 숨기기",
+        "exit": "종료",
+        "tray-tooltip": "YouTube Music - 빠른 제어"
+      }
+    },
     "quality-changer": {
       "backend": {
         "dialog": {

@@ -694,6 +694,47 @@
         }
       }
     },
+    "quick-controls": {
+      "description": "Обеспечивает быстрые меню управления воспроизведением для операций правого клика на Dock/системном трее",
+      "name": "Быстрое Управление",
+      "controls": {
+        "play": "Воспроизвести",
+        "pause": "Пауза",
+        "previous": "Предыдущий",
+        "next": "Следующий",
+        "like": "Нравится",
+        "unlike": "Убрать лайк",
+        "shuffle": "Перемешать",
+        "shuffle-on": "Перемешивание вкл",
+        "shuffle-off": "Перемешивание выкл",
+        "shuffle-enabled": "Перемешивание ✓",
+        "repeat-mode": "Режим повтора"
+      },
+      "repeat": {
+        "off": "Повтор выключен",
+        "one": "Повтор одного",
+        "all": "Повтор всех",
+        "label": {
+          "off": "Выкл",
+          "one": "Один",
+          "all": "Все"
+        }
+      },
+      "errors": {
+        "platform-not-supported": "Неподдерживаемая платформа операционной системы",
+        "initialization-failed": "Не удалось инициализировать контроллер платформы",
+        "menu-creation-failed": "Не удалось создать меню управления"
+      },
+      "debug": {
+        "menu-label": "Отладочная информация"
+      },
+      "platform": {
+        "show-window": "Показать YouTube Music",
+        "hide-window": "Скрыть YouTube Music",
+        "exit": "Выход",
+        "tray-tooltip": "YouTube Music - Быстрое Управление"
+      }
+    },
     "quality-changer": {
       "backend": {
         "dialog": {

@@ -694,6 +694,47 @@
         }
       }
     },
+    "quick-controls": {
+      "description": "Proporciona menús de control de reproducción rápida para operaciones de clic derecho en Dock/bandeja del sistema",
+      "name": "Controles Rápidos",
+      "controls": {
+        "play": "Reproducir",
+        "pause": "Pausar",
+        "previous": "Anterior",
+        "next": "Siguiente",
+        "like": "Me gusta",
+        "unlike": "Ya no me gusta",
+        "shuffle": "Aleatorio",
+        "shuffle-on": "Aleatorio activado",
+        "shuffle-off": "Aleatorio desactivado",
+        "shuffle-enabled": "Aleatorio ✓",
+        "repeat-mode": "Modo de repetición"
+      },
+      "repeat": {
+        "off": "Repetición desactivada",
+        "one": "Repetir una",
+        "all": "Repetir todas",
+        "label": {
+          "off": "Desactivado",
+          "one": "Una",
+          "all": "Todas"
+        }
+      },
+      "errors": {
+        "platform-not-supported": "Plataforma de sistema operativo no compatible",
+        "initialization-failed": "Error al inicializar el controlador de plataforma",
+        "menu-creation-failed": "Error al crear el menú de control"
+      },
+      "debug": {
+        "menu-label": "Información de depuración"
+      },
+      "platform": {
+        "show-window": "Mostrar YouTube Music",
+        "hide-window": "Ocultar YouTube Music",
+        "exit": "Salir",
+        "tray-tooltip": "YouTube Music - Controles Rápidos"
+      }
+    },
     "quality-changer": {
       "backend": {
         "dialog": {

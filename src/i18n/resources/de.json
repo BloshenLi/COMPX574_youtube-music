@@ -694,6 +694,47 @@
         }
       }
     },
+    "quick-controls": {
+      "description": "Bietet schnelle Wiedergabesteuerungsmenüs für Dock/Systemtray-Rechtsklick-Operationen",
+      "name": "Schnellsteuerung",
+      "controls": {
+        "play": "Wiedergabe",
+        "pause": "Pausieren",
+        "previous": "Vorheriger",
+        "next": "Nächster",
+        "like": "Gefällt mir",
+        "unlike": "Gefällt mir nicht mehr",
+        "shuffle": "Zufällig",
+        "shuffle-on": "Zufällig ein",
+        "shuffle-off": "Zufällig aus",
+        "shuffle-enabled": "Zufällig ✓",
+        "repeat-mode": "Wiederholungsmodus"
+      },
+      "repeat": {
+        "off": "Wiederholung aus",
+        "one": "Eins wiederholen",
+        "all": "Alle wiederholen",
+        "label": {
+          "off": "Aus",
+          "one": "Eins",
+          "all": "Alle"
+        }
+      },
+      "errors": {
+        "platform-not-supported": "Nicht unterstützte Betriebssystemplattform",
+        "initialization-failed": "Plattform-Controller-Initialisierung fehlgeschlagen",
+        "menu-creation-failed": "Erstellung des Steuerungsmenüs fehlgeschlagen"
+      },
+      "debug": {
+        "menu-label": "Debug-Informationen"
+      },
+      "platform": {
+        "show-window": "YouTube Music anzeigen",
+        "hide-window": "YouTube Music ausblenden",
+        "exit": "Beenden",
+        "tray-tooltip": "YouTube Music - Schnellsteuerung"
+      }
+    },
     "quality-changer": {
       "backend": {
         "dialog": {

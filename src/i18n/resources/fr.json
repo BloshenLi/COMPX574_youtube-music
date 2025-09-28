@@ -694,6 +694,47 @@
         }
       }
     },
+    "quick-controls": {
+      "description": "Fournit des menus de contrôle de lecture rapide pour les opérations de clic droit sur Dock/barre d'état système",
+      "name": "Contrôles Rapides",
+      "controls": {
+        "play": "Lecture",
+        "pause": "Pause",
+        "previous": "Précédent",
+        "next": "Suivant",
+        "like": "J'aime",
+        "unlike": "Je n'aime plus",
+        "shuffle": "Aléatoire",
+        "shuffle-on": "Aléatoire activé",
+        "shuffle-off": "Aléatoire désactivé",
+        "shuffle-enabled": "Aléatoire ✓",
+        "repeat-mode": "Mode de répétition"
+      },
+      "repeat": {
+        "off": "Répétition désactivée",
+        "one": "Répéter une fois",
+        "all": "Répéter tout",
+        "label": {
+          "off": "Désactivé",
+          "one": "Une fois",
+          "all": "Tout"
+        }
+      },
+      "errors": {
+        "platform-not-supported": "Plateforme de système d'exploitation non prise en charge",
+        "initialization-failed": "Échec de l'initialisation du contrôleur de plateforme",
+        "menu-creation-failed": "Échec de la création du menu de contrôle"
+      },
+      "debug": {
+        "menu-label": "Informations de débogage"
+      },
+      "platform": {
+        "show-window": "Afficher YouTube Music",
+        "hide-window": "Masquer YouTube Music",
+        "exit": "Quitter",
+        "tray-tooltip": "YouTube Music - Contrôles Rapides"
+      }
+    },
     "quality-changer": {
       "backend": {
         "dialog": {
