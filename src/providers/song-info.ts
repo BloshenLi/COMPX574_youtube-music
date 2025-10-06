@@ -211,6 +211,7 @@ const registerProvider = (win: BrowserWindow) => {
         elapsedSeconds,
       }: { isPaused: boolean; elapsedSeconds: number },
     ) => {
+      // console.log('[main] play-or-paused.  isPaused =', isPaused);
       const tempSongInfo = await dataMutex.runExclusive<SongInfo | null>(() => {
         if (!songInfo) {
           return null;
@@ -226,6 +227,8 @@ const registerProvider = (win: BrowserWindow) => {
         for (const c of callbacks) {
           c(tempSongInfo, SongInfoEvent.PlayOrPaused);
         }
+        // I added
+        win.webContents.send('ytmd:play-or-paused', { isPaused, elapsedSeconds });
       }
     },
   );
