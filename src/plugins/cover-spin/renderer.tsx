@@ -45,7 +45,7 @@ const injectOnce = () => {
   img.classList.add('rotating');
 
   // Check if the audio is initially paused
-const onAudioCanPlay = (e: Event) => {
+  const onAudioCanPlay = (e: Event) => {
   const { audioContext } = (e as CustomEvent).detail;
   const isInitiallyPaused = audioContext.state !== 'running';
   if (isInitiallyPaused) {
