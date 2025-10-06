@@ -38,7 +38,7 @@ const injectOnce = () => {
 
   // Add rotating class to the image
   const img = document.querySelector<HTMLImageElement>(
-    'ytmusic-player-bar .thumbnail-image-wrapper img.image'
+    'ytmusic-player-bar .thumbnail-image-wrapper img.image',
   );
   if (!img) return;
 
