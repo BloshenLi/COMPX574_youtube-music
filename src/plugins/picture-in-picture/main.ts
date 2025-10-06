@@ -20,6 +20,7 @@ export const onMainLoad = async ({
 
   const pipPosition = () =>
     (config.savePosition && config['pip-position']) || [10, 10];
+    // [100, 500];
   const pipSize = () => (config.saveSize && config['pip-size']) || [450, 275];
 
   const togglePiP = () => {
@@ -111,6 +112,7 @@ export const onMainLoad = async ({
       setConfig({ 'pip-position': [x, y] });
     }
   });
+
 
   window.on('resize', () => {
     if (config.isInPiP && !config.useNativePiP) {

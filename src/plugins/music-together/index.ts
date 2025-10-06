@@ -846,6 +846,7 @@ export default createPlugin<
 
       /* account data getter */
       this.initMyProfile();
+
     },
     onPlayerApiReady(playerApi) {
       this.queue = new Queue({

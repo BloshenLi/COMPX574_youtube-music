@@ -39,7 +39,7 @@ export default createPlugin({
 
     // Pause/play button
     const pausePlayButton = new TouchBarButton({});
-
+   
     // The song control buttons (control functions are in the same order)
     const buttons = new TouchBarSegmentedControl({
       mode: 'buttons',

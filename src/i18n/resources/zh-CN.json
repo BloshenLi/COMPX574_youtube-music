@@ -372,6 +372,12 @@
       "description": "绕过 YouTube 年龄验证",
       "name": "绕过年龄验证"
     },
+
+    "cover-spin": {
+      "description": "让专辑封面在播放时旋转",
+      "name": "封面旋转"
+    },
+
     "captions-selector": {
       "description": "YouTube Music 音轨字幕选择器",
       "menu": {

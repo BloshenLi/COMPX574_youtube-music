@@ -372,6 +372,12 @@
       "description": "Bypass YouTube's age verification",
       "name": "Bypass Age Restrictions"
     },
+
+    "cover-spin": {
+      "description": "Let cover spin while playing",
+      "name": "Cover Spin"
+    },
+
     "captions-selector": {
       "description": "Caption selector for YouTube Music audio tracks",
       "menu": {

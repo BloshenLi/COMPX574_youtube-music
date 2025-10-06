@@ -26,6 +26,7 @@ export const onPlayerApiReady = async (
     if ((await getConfig()).useNativePiP) {
       const isInPiP = document.pictureInPictureElement !== null;
       const video = document.querySelector<HTMLVideoElement>('video');
+
       const togglePiP = () =>
         isInPiP
           ? document.exitPictureInPicture()
@@ -41,6 +42,7 @@ export const onPlayerApiReady = async (
     ipc.send('plugin:toggle-picture-in-picture');
     return false;
   };
+  
 
   if (config.hotkey) {
     const hotkeyEvent = toKeyEvent(config.hotkey);
@@ -89,6 +91,7 @@ export const onPlayerApiReady = async (
     await togglePictureInPicture();
   };
 
+  
   ipc.on('ytmd:pip-toggle', (isPip: boolean) => {
     if (exitFullScreenButton && player) {
       if (isPip) {
@@ -171,3 +174,4 @@ export const onPlayerApiReady = async (
     subtree: true,
   });
 };
+
