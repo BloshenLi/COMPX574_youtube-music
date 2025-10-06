@@ -43,11 +43,6 @@ ytmusic-app-layout {
   --ytmusic-nav-bar-height: 90px;
 }
 
-/* Blocking annoying elements */
-ytmusic-mealbar-promo-renderer {
-  display: none !important;
-}
-
 /* Disable Image Selection */
 img {
   -webkit-user-select: none;
@@ -102,5 +97,3 @@ tp-yt-iron-dropdown,
 tp-yt-paper-dialog {
   app-region: no-drag;
 }
-
-
