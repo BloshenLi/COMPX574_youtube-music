@@ -1,3 +1,5 @@
+import { shell } from 'electron';
+
 import { createPlugin } from '@/utils';
 
 const aiSites = {
@@ -5,7 +7,7 @@ const aiSites = {
   Gemini: 'Gemini',
 } as const;
 
-type AiSite = typeof aiSites[keyof typeof aiSites];
+type AiSite = (typeof aiSites)[keyof typeof aiSites];
 
 interface Config {
   enabled: boolean;
@@ -13,7 +15,9 @@ interface Config {
 }
 
 const urlFor = (s: AiSite) =>
-  s === aiSites.Gemini ? 'https://gemini.google.com/' : 'https://chat.openai.com/';
+  s === aiSites.Gemini
+    ? 'https://gemini.google.com/'
+    : 'https://chat.openai.com/';
 
 export default createPlugin<unknown, unknown, unknown, Config>({
   name: () => 'Listen with AI',
@@ -42,14 +46,13 @@ export default createPlugin<unknown, unknown, unknown, Config>({
         label: 'Open website',
         click() {
           getConfig().then(({ site }) => {
-            const { shell } = require('electron') as typeof import('electron');
             shell.openExternal(urlFor((site as AiSite) || aiSites.ChatGPT));
           });
         },
       },
     ];
   },
-    renderer: {
+  renderer: {
     async start({ getConfig }) {
       const ICON_SVG = `
         <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"
@@ -64,7 +67,7 @@ export default createPlugin<unknown, unknown, unknown, Config>({
       const urlFromConfig = async () => {
         try {
           const { site } = await getConfig<Config>();
-          return urlFor((site as AiSite) || aiSites.ChatGPT);
+          return urlFor(site || aiSites.ChatGPT);
         } catch {
           return urlFor(aiSites.ChatGPT);
         }
@@ -100,8 +103,14 @@ export default createPlugin<unknown, unknown, unknown, Config>({
           cursor: 'pointer',
         });
 
-        btn.addEventListener('mouseenter', () => (btn.style.backgroundColor = 'rgba(255,255,255,0.08)'));
-        btn.addEventListener('mouseleave', () => (btn.style.backgroundColor = 'transparent'));
+        btn.addEventListener(
+          'mouseenter',
+          () => (btn.style.backgroundColor = 'rgba(255,255,255,0.08)'),
+        );
+        btn.addEventListener(
+          'mouseleave',
+          () => (btn.style.backgroundColor = 'transparent'),
+        );
 
         btn.addEventListener('click', async () => {
           const url = await urlFromConfig();
