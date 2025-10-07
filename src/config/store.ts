@@ -246,7 +246,6 @@ const migrations = {
     };
 
     for (const enabledPlugin of enabledPlugins) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       plugins[enabledPlugin] = {
         ...plugins[enabledPlugin],
         enabled: true,

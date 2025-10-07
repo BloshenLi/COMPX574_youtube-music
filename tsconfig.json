@@ -22,10 +22,15 @@
       "@assets/*": ["./assets/*"]
     }
   },
-  "exclude": ["./dist"],
   "include": [
     "electron.vite.config.mts",
     "./src/**/*",
-    "*.config.*js",
+    "*.config.*js"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "docs",
+    "tests"
   ]
 }

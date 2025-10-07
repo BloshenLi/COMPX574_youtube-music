@@ -1,5 +1,3 @@
-/* eslint-disable */
-
 // Source: https://addons.mozilla.org/en-US/firefox/addon/adblock-for-youtube/
 // https://robwu.nl/crxviewer/?crx=https%3A%2F%2Faddons.mozilla.org%2Fen-US%2Ffirefox%2Faddon%2Fadblock-for-youtube%2F
 
@@ -37,7 +35,7 @@ export const inject = (contextBridge) => {
 
       //
       return o;
-    }
+    };
 
     contextBridge.exposeInMainWorld('_pruner', pruner);
   }
@@ -58,7 +56,7 @@ export const inject = (contextBridge) => {
     {
       chain: 'ytInitialPlayerResponse.adSlots',
       cValue: 'undefined',
-    }
+    },
   ];
 
   chains.forEach(function ({ chain, cValue }) {
