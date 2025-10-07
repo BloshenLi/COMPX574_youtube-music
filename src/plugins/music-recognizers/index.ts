@@ -1,4 +1,5 @@
-// menu + robot main icon 
+import { shell } from 'electron';
+
 import { createPlugin } from '@/utils';
 
 const recognizers = {
@@ -6,7 +7,7 @@ const recognizers = {
   Shazam: 'Shazam',
 } as const;
 
-type Recognizer = typeof recognizers[keyof typeof recognizers];
+type Recognizer = (typeof recognizers)[keyof typeof recognizers];
 
 interface Config {
   enabled: boolean;
@@ -14,7 +15,9 @@ interface Config {
 }
 
 const urlFor = (r: Recognizer) =>
-  r === recognizers.Shazam ? 'https://www.shazam.com/' : 'https://www.aha-music.com/';
+  r === recognizers.Shazam
+    ? 'https://www.shazam.com/'
+    : 'https://www.aha-music.com/';
 
 export default createPlugin<unknown, unknown, unknown, Config>({
   name: () => 'Music Recognizer',
@@ -36,7 +39,7 @@ export default createPlugin<unknown, unknown, unknown, Config>({
           type: 'radio',
           checked: (cfg.recognizer || recognizers.AHA) === r,
           click() {
-            setConfig({ recognizer: r as Recognizer });
+            setConfig({ recognizer: r });
           },
         })),
       },
@@ -44,16 +47,15 @@ export default createPlugin<unknown, unknown, unknown, Config>({
         label: 'Open website',
         click() {
           getConfig().then(({ recognizer }) => {
-            const { shell } = require('electron') as typeof import('electron');
-            shell.openExternal(urlFor((recognizer as Recognizer) || recognizers.AHA));
+            shell.openExternal(urlFor(recognizer || recognizers.AHA));
           });
         },
       },
     ];
-<<<<<<< HEAD
   },
+
   renderer: {
-    async start({ getConfig }) {
+    start({ getConfig }) {
       const ICON_SVG = `
         <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"
              style="pointer-events:none;display:block;width:24px;height:24px">
@@ -64,10 +66,17 @@ export default createPlugin<unknown, unknown, unknown, Config>({
         </svg>
       `;
 
+      const ICON_ROBOT = `
+        <svg viewBox="0 0 24 24" width="24" height="24">
+          <path fill="currentColor"
+            d="M12 2a2 2 0 0 0-2 2v1H8v2H7v2H5v2h14v-2h-2V7h-1V5h-2V4a2 2 0 0 0-2-2zM7 13v4h2v-4H7zm8 0v4h2v-4h-2z"/>
+        </svg>
+      `;
+
       const urlFromConfig = async () => {
         try {
           const { recognizer } = await getConfig<Config>();
-          return urlFor((recognizer as Recognizer) || recognizers.AHA);
+          return urlFor(recognizer || recognizers.AHA);
         } catch {
           return urlFor(recognizers.AHA);
         }
@@ -82,14 +91,6 @@ export default createPlugin<unknown, unknown, unknown, Config>({
           bar.querySelector<HTMLElement>('#buttons')
         );
       };
-
-      // robot icon
-      const ICON_ROBOT = `
-        <svg viewBox="0 0 24 24" width="24" height="24">
-          <path fill="currentColor"
-            d="M12 2a2 2 0 0 0-2 2v1H8v2H7v2H5v2h14v-2h-2V7h-1V5h-2V4a2 2 0 0 0-2-2zM7 13v4h2v-4H7zm8 0v4h2v-4h-2z"/>
-        </svg>
-      `;
 
       const makeMainWrapper = () => {
         const exist = document.getElementById('music-tools-wrapper');
@@ -146,7 +147,8 @@ export default createPlugin<unknown, unknown, unknown, Config>({
         wrapper.append(toggle, menu);
         return wrapper;
       };
-            const makeButton = () => {
+
+      const makeButton = () => {
         const btn = document.createElement('button');
         btn.id = 'recognizer-launcher-btn';
         btn.title = 'Open recognizer (AHA/Shazam)';
@@ -166,8 +168,14 @@ export default createPlugin<unknown, unknown, unknown, Config>({
           cursor: 'pointer',
         });
 
-        btn.addEventListener('mouseenter', () => (btn.style.backgroundColor = 'rgba(255,255,255,0.08)'));
-        btn.addEventListener('mouseleave', () => (btn.style.backgroundColor = 'transparent'));
+        btn.addEventListener('mouseenter', () => {
+          btn.style.backgroundColor = 'rgba(255,255,255,0.08)';
+        });
+
+        btn.addEventListener('mouseleave', () => {
+          btn.style.backgroundColor = 'transparent';
+        });
+
         btn.addEventListener('click', async () => {
           const url = await urlFromConfig();
           window.open(url, '_blank', 'noopener,noreferrer');
@@ -181,12 +189,15 @@ export default createPlugin<unknown, unknown, unknown, Config>({
         if (!right) return false;
 
         const wrapper = makeMainWrapper();
-        if (!document.getElementById('music-tools-wrapper')) right.appendChild(wrapper);
+        if (!document.getElementById('music-tools-wrapper')) {
+          right.appendChild(wrapper);
+        }
 
         const menu = wrapper.querySelector('#music-tools-menu');
         if (menu && !document.getElementById('recognizer-launcher-btn')) {
           menu.appendChild(makeButton());
         }
+
         return true;
       };
 
@@ -196,6 +207,3 @@ export default createPlugin<unknown, unknown, unknown, Config>({
     },
   },
 });
-=======
-  },
->>>>>>> b63cc359 (Add base plugin structure and menu configuration for Music Recognizer)
