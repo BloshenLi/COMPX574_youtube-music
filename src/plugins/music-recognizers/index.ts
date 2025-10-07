@@ -145,3 +145,53 @@ export default createPlugin<unknown, unknown, unknown, Config>({
         wrapper.append(toggle, menu);
         return wrapper;
       };
+      const makeButton = () => {
+        const btn = document.createElement('button');
+        btn.id = 'recognizer-launcher-btn';
+        btn.title = 'Open recognizer (AHA/Shazam)';
+        btn.classList.add('style-scope', 'ytmusic-player-bar');
+        btn.innerHTML = ICON_SVG;
+
+        Object.assign(btn.style, {
+          width: '40px',
+          height: '40px',
+          background: 'transparent',
+          border: 'none',
+          color: 'var(--yt-spec-text-primary, #fff)',
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          borderRadius: '50%',
+          cursor: 'pointer',
+        });
+
+        btn.addEventListener('mouseenter', () => (btn.style.backgroundColor = 'rgba(255,255,255,0.08)'));
+        btn.addEventListener('mouseleave', () => (btn.style.backgroundColor = 'transparent'));
+        btn.addEventListener('click', async () => {
+          const url = await urlFromConfig();
+          window.open(url, '_blank', 'noopener,noreferrer');
+        });
+
+        return btn;
+      };
+
+      const inject = () => {
+        const right = findRightControls();
+        if (!right) return false;
+
+        const wrapper = makeMainWrapper();
+        if (!document.getElementById('music-tools-wrapper')) right.appendChild(wrapper);
+
+        const menu = wrapper.querySelector('#music-tools-menu');
+        if (menu && !document.getElementById('recognizer-launcher-btn')) {
+          menu.appendChild(makeButton());
+        }
+        return true;
+      };
+
+      inject();
+      const poll = setInterval(inject, 800);
+      setTimeout(() => clearInterval(poll), 12000);
+    },
+  },
+});
