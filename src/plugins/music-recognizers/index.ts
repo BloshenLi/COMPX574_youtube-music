@@ -50,6 +50,7 @@ export default createPlugin<unknown, unknown, unknown, Config>({
         },
       },
     ];
+<<<<<<< HEAD
   },
   renderer: {
     async start({ getConfig }) {
@@ -195,3 +196,6 @@ export default createPlugin<unknown, unknown, unknown, Config>({
     },
   },
 });
+=======
+  },
+>>>>>>> b63cc359 (Add base plugin structure and menu configuration for Music Recognizer)
