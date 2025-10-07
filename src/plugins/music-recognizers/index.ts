@@ -1,4 +1,4 @@
-// plugins/shazam/index.ts — 折疊選單 + 機器人頭主按鈕版
+// menu + robot main icon 
 import { createPlugin } from '@/utils';
 
 const recognizers = {
@@ -51,7 +51,6 @@ export default createPlugin<unknown, unknown, unknown, Config>({
       },
     ];
   },
-
   renderer: {
     async start({ getConfig }) {
       const ICON_SVG = `
@@ -83,7 +82,7 @@ export default createPlugin<unknown, unknown, unknown, Config>({
         );
       };
 
-      // 機器人頭圖示
+      // ROBOT ICON
       const ICON_ROBOT = `
         <svg viewBox="0 0 24 24" width="24" height="24">
           <path fill="currentColor"
@@ -146,54 +145,3 @@ export default createPlugin<unknown, unknown, unknown, Config>({
         wrapper.append(toggle, menu);
         return wrapper;
       };
-
-      const makeButton = () => {
-        const btn = document.createElement('button');
-        btn.id = 'recognizer-launcher-btn';
-        btn.title = 'Open recognizer (AHA/Shazam)';
-        btn.classList.add('style-scope', 'ytmusic-player-bar');
-        btn.innerHTML = ICON_SVG;
-
-        Object.assign(btn.style, {
-          width: '40px',
-          height: '40px',
-          background: 'transparent',
-          border: 'none',
-          color: 'var(--yt-spec-text-primary, #fff)',
-          display: 'inline-flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          borderRadius: '50%',
-          cursor: 'pointer',
-        });
-
-        btn.addEventListener('mouseenter', () => (btn.style.backgroundColor = 'rgba(255,255,255,0.08)'));
-        btn.addEventListener('mouseleave', () => (btn.style.backgroundColor = 'transparent'));
-        btn.addEventListener('click', async () => {
-          const url = await urlFromConfig();
-          window.open(url, '_blank', 'noopener,noreferrer');
-        });
-
-        return btn;
-      };
-
-      const inject = () => {
-        const right = findRightControls();
-        if (!right) return false;
-
-        const wrapper = makeMainWrapper();
-        if (!document.getElementById('music-tools-wrapper')) right.appendChild(wrapper);
-
-        const menu = wrapper.querySelector('#music-tools-menu');
-        if (menu && !document.getElementById('recognizer-launcher-btn')) {
-          menu.appendChild(makeButton());
-        }
-        return true;
-      };
-
-      inject();
-      const poll = setInterval(inject, 800);
-      setTimeout(() => clearInterval(poll), 12000);
-    },
-  },
-});
