@@ -470,9 +470,9 @@ async function onApiLoaded() {
  */
 const defineYTMDTransElements = () => {
   const YTMDTrans = function () {};
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
   YTMDTrans.prototype = Object.create(HTMLElement.prototype);
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+
   YTMDTrans.prototype.connectedCallback = function () {
     const that = this as HTMLElement;
     const key = that.getAttribute('key');
