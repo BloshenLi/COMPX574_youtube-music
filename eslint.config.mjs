@@ -80,6 +80,10 @@ export default tsEslint.config(
       // -------------------------
       // ⚙️ TypeScript 規則
       // -------------------------
+      'stylistic/jsx-pascal-case': 'error',
+      'stylistic/jsx-curly-spacing': ['error', { when: 'never', children: true }],
+      'stylistic/jsx-sort-props': 'error',
+      'prettier/prettier': ['error', { singleQuote: true, semi: true, tabWidth: 2, trailingComma: 'all', quoteProps: 'preserve' }],
       '@typescript-eslint/no-floating-promises': 'off',
       '@typescript-eslint/no-misused-promises': ['off', { checksVoidReturn: false }],
       '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
@@ -101,6 +105,11 @@ export default tsEslint.config(
       // -------------------------
       // 📦 import 管理
       // -------------------------
+      '@typescript-eslint/consistent-type-imports': ['error', {
+        fixStyle: 'inline-type-imports',
+        prefer: 'type-imports',
+        disallowTypeAnnotations: false,
+      }],
       'importPlugin/first': 'error',
       'importPlugin/no-duplicates': 'error',
       'importPlugin/no-unresolved': ['error', { ignore: ['^virtual:', '\\?inline$', '\\?raw$', '\\?asset&asarUnpack'] }],

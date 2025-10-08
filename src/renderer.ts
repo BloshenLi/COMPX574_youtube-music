@@ -1,7 +1,7 @@
 import i18next from 'i18next';
 
 import { startingPages } from './providers/extracted-data';
-import setupSongInfo from './providers/song-info-front';
+import { setupSongInfo } from './providers/song-info-front';
 import {
   createContext,
   forceLoadRendererPlugin,
@@ -286,7 +286,15 @@ async function onApiLoaded() {
 
       if (!app || !searchBox) return;
 
-      const result = await app.networkManager.fetch('/search', {
+      const result = await app.networkManager.fetch<
+        unknown,
+        {
+          query: string;
+          params?: string;
+          continuation?: string;
+          suggestStats?: unknown;
+        }
+      >('/search', {
         query,
         params,
         continuation,
@@ -388,7 +396,74 @@ async function onApiLoaded() {
 
     document.head.appendChild(style);
   }
+  
+  // const injectOnce = () => {
+  //   const styleId = 'ytmd-round-thumbnail-once';
+  //   if (document.querySelector(`#${styleId}`)) return;
+
+  //   /* 1. round thumbnail style */
+  //   const style = document.createElement('style');
+  //   style.id = styleId;
+  //   style.textContent = `
+  //     ytmusic-player-bar .thumbnail-image-wrapper img.image {
+  //       border-radius: 50% !important;
+  //       width: 48px !important;
+  //       height: 48px !important;
+  //       object-fit: cover !important;
+  //     }
+  //   `;
+  //   document.head.appendChild(style);
+
+  //     /* 2. spin animation style */
+  //   const rotateStyle = document.createElement('style');
+  //   rotateStyle.textContent = `
+  //     @keyframes spin {
+  //       from { transform: rotate(0deg); }
+  //       to { transform: rotate(360deg); }
+  //     }
+  //     ytmusic-player-bar .thumbnail-image-wrapper img.image.rotating {
+  //       animation: spin 8s linear infinite;
+    
+  //       animation-play-state: running;
+  //     }
+  //     ytmusic-player-bar .thumbnail-image-wrapper img.image.paused {
+  //       animation-play-state: paused;
+  //     }
+  //   `;
+  //   document.head.appendChild(rotateStyle);
+
+  //   /* 3. observe play/pause state */
+  //   const img = document.querySelector<HTMLImageElement>(
+  //     'ytmusic-player-bar .thumbnail-image-wrapper img.image'
+  //     );
+  //     if (!img) return;
+
+  //     // only add class once. Because we want the rotation to continue at the last angle.
+  //     img.classList.add('rotating');
+
+  //     window.ipcRenderer.on('ytmd:play-or-paused', (_, { isPaused }) => {
+  //       if (isPaused) {
+  //         img.classList.add('paused');      
+  //       } else {
+  //         img.classList.remove('paused');   
+  //       }
+  //     });
+  // };
+
+  
+  // const observer = new MutationObserver(() => {
+  //   if (document.querySelector('ytmusic-player-bar .thumbnail-image-wrapper')) {
+  //     injectOnce();          
+  //     observer.disconnect(); 
+  //   }
+  // });
+
+  
+  // observer.observe(document.body, { childList: true, subtree: true });
+  
+
 }
+
 
 /**
  * YouTube Music still using ES5, so we need to define custom elements using ES5 style
@@ -505,6 +580,7 @@ const initObserver = async () => {
         isApiLoaded = true;
 
         onApiLoaded();
+        
       }
     }
   });

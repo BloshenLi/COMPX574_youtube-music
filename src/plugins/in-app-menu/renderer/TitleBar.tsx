@@ -1,4 +1,4 @@
-import { Menu, MenuItem } from 'electron';
+import { type Menu, type MenuItem } from 'electron';
 import {
   createEffect,
   createResource,
@@ -23,6 +23,7 @@ import { cacheNoArgs } from '@/providers/decorators';
 
 import type { RendererContext } from '@/types/contexts';
 import type { InAppMenuConfig } from '../constants';
+
 
 const titleStyle = cacheNoArgs(
   () => css`
@@ -105,6 +106,28 @@ const animationStyle = cacheNoArgs(() => ({
   `,
 }));
 
+let dragMask: HTMLDivElement | null = null;
+
+/** when the dropdown menu is opened, call this function */
+function disableDrag() {
+  const navBar = document.querySelector<HTMLElement>('ytmusic-nav-bar');
+  if (!navBar) return;
+
+  
+  if (!dragMask) {
+    dragMask = document.createElement('div');
+    dragMask.className = 'drag-mask';
+  }
+
+  navBar.style.position = 'relative';
+  navBar.appendChild(dragMask);
+}
+
+/** when the dropdown menu is closed, call this function */
+function enableDrag() {
+  dragMask?.remove();
+}
+
 export type PanelRendererProps = {
   items: Electron.Menu['items'];
   level?: number[];
@@ -120,22 +143,22 @@ const PanelRenderer = (props: PanelRendererProps) => {
           <Switch>
             <Match when={subItem().type === 'normal'}>
               <PanelItem
-                type={'normal'}
-                name={subItem().label}
                 chip={subItem().sublabel}
-                toolTip={subItem().toolTip}
                 commandId={subItem().commandId}
+                name={subItem().label}
                 onClick={() => props.onClick?.(subItem().commandId)}
+                toolTip={subItem().toolTip}
+                type={'normal'}
               />
             </Match>
             <Match when={subItem().type === 'submenu'}>
               <PanelItem
-                type={'submenu'}
-                name={subItem().label}
                 chip={subItem().sublabel}
-                toolTip={subItem().toolTip}
-                level={[...(props.level ?? []), subItem().commandId]}
                 commandId={subItem().commandId}
+                level={[...(props.level ?? []), subItem().commandId]}
+                name={subItem().label}
+                toolTip={subItem().toolTip}
+                type={'submenu'}
               >
                 <PanelRenderer
                   items={subItem().submenu?.items ?? []}
@@ -146,26 +169,26 @@ const PanelRenderer = (props: PanelRendererProps) => {
             </Match>
             <Match when={subItem().type === 'checkbox'}>
               <PanelItem
-                type={'checkbox'}
-                name={subItem().label}
                 checked={subItem().checked}
                 chip={subItem().sublabel}
-                toolTip={subItem().toolTip}
                 commandId={subItem().commandId}
+                name={subItem().label}
                 onChange={() => props.onClick?.(subItem().commandId)}
+                toolTip={subItem().toolTip}
+                type={'checkbox'}
               />
             </Match>
             <Match when={subItem().type === 'radio'}>
               <PanelItem
-                type={'radio'}
-                name={subItem().label}
                 checked={subItem().checked}
                 chip={subItem().sublabel}
-                toolTip={subItem().toolTip}
                 commandId={subItem().commandId}
+                name={subItem().label}
                 onChange={() =>
                   props.onClick?.(subItem().commandId, radioGroup())
                 }
+                toolTip={subItem().toolTip}
+                type={'radio'}
               />
             </Match>
             <Match when={subItem().type === 'separator'}>
@@ -190,6 +213,11 @@ export const TitleBar = (props: TitleBarProps) => {
   const [openTarget, setOpenTarget] = createSignal<HTMLElement | null>(null);
   const [menu, setMenu] = createSignal<Menu | null>(null);
   const [mouseY, setMouseY] = createSignal(0);
+
+  // subscribe to changes in the value of openTarget
+  createEffect(() => {
+    openTarget() ? disableDrag() : enableDrag();
+  });
 
   const [data, { refetch }] = createResource(
     async () => (await props.ipc.invoke('get-menu')) as Promise<Menu | null>,
@@ -281,14 +309,18 @@ export const TitleBar = (props: TitleBarProps) => {
       setIgnoreTransition(false);
     });
     props.ipc.on('toggle-in-app-menu', () => {
-      setCollapsed(!collapsed());
+      const next = !collapsed();
+      setCollapsed(next);
+  
     });
 
     props.ipc.on('window-maximize', refetchMaximize);
     props.ipc.on('window-unmaximize', refetchMaximize);
 
+
     // close menu when the outside of the panel or sub-panel is clicked
     document.body.addEventListener('click', (e) => {
+      console.log("click", e.target);
       if (
         e.target instanceof HTMLElement &&
         !(
@@ -299,6 +331,7 @@ export const TitleBar = (props: TitleBarProps) => {
         setOpenTarget(null);
       }
     });
+
 
     // tracking mouse position
     window.addEventListener('mousemove', listener);
@@ -325,10 +358,11 @@ export const TitleBar = (props: TitleBarProps) => {
 
   return (
     <nav
-      data-ytmd-main-panel={true}
       class={titleStyle()}
       data-macos={props.isMacOS}
       data-show={mouseY() < 32}
+      data-ytmd-main-panel={true}
+      id={'ytmd-title-bar-main-panel'}
     >
       <IconButton
         onClick={() => setCollapsed(!collapsed())}
@@ -336,7 +370,7 @@ export const TitleBar = (props: TitleBarProps) => {
           'border-top-left-radius': '4px',
         }}
       >
-        <svg width={16} height={16} viewBox={'0 0 24 24'}>
+        <svg height={16} viewBox={'0 0 24 24'} width={16}>
           <path
             d="M3 17h12a1 1 0 0 1 .117 1.993L15 19H3a1 1 0 0 1-.117-1.993L3 17h12H3Zm0-6h18a1 1 0 0 1 .117 1.993L21 13H3a1 1 0 0 1-.117-1.993L3 11h18H3Zm0-6h15a1 1 0 0 1 .117 1.993L18 7H3a1 1 0 0 1-.117-1.993L3 5h15H3Z"
             fill="currentColor"
@@ -344,26 +378,29 @@ export const TitleBar = (props: TitleBarProps) => {
         </svg>
       </IconButton>
       <TransitionGroup
-        enterClass={
-          ignoreTransition()
-            ? animationStyle().fakeTarget
-            : animationStyle().enter
-        }
         enterActiveClass={
           ignoreTransition()
             ? animationStyle().fake
             : animationStyle().enterActive
         }
-        exitToClass={
+        enterClass={
           ignoreTransition()
             ? animationStyle().fakeTarget
-            : animationStyle().exitTo
+            : animationStyle().enter
         }
         exitActiveClass={
           ignoreTransition()
             ? animationStyle().fake
             : animationStyle().exitActive
         }
+        exitToClass={
+          ignoreTransition()
+            ? animationStyle().fakeTarget
+            : animationStyle().exitTo
+        }
+        onAfterEnter={(element) => {
+          (element as HTMLElement).style.removeProperty('transition-delay');
+        }}
         onBeforeEnter={(element) => {
           if (ignoreTransition()) return;
           const index = Number(element.getAttribute('data-index') ?? 0);
@@ -372,9 +409,6 @@ export const TitleBar = (props: TitleBarProps) => {
             'transition-delay',
             `${index * 0.025}s`,
           );
-        }}
-        onAfterEnter={(element) => {
-          (element as HTMLElement).style.removeProperty('transition-delay');
         }}
         onBeforeExit={(element) => {
           if (ignoreTransition()) return;
@@ -405,18 +439,18 @@ export const TitleBar = (props: TitleBarProps) => {
               return (
                 <>
                   <MenuButton
-                    ref={setAnchor}
-                    text={item().label}
-                    onClick={handleClick}
-                    selected={openTarget() === anchor()}
                     data-index={index}
                     data-length={data()?.items.length}
+                    onClick={handleClick}
+                    ref={setAnchor}
+                    selected={openTarget() === anchor()}
+                    text={item().label}
                   />
                   <Panel
-                    open={openTarget() === anchor()}
                     anchor={anchor()}
-                    placement={'bottom-start'}
                     offset={{ mainAxis: 8 }}
+                    open={openTarget() === anchor()}
+                    placement={'bottom-start'}
                   >
                     <PanelRenderer
                       items={item().submenu?.items ?? []}
@@ -433,9 +467,9 @@ export const TitleBar = (props: TitleBarProps) => {
         <div style={{ flex: 1 }} />
         <WindowController
           isMaximize={isMaximized()}
-          onToggleMaximize={handleToggleMaximize}
-          onMinimize={handleMinimize}
           onClose={handleClose}
+          onMinimize={handleMinimize}
+          onToggleMaximize={handleToggleMaximize}
         />
       </Show>
     </nav>
