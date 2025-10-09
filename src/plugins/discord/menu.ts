@@ -1,6 +1,6 @@
 import prompt from 'custom-electron-prompt';
 
-import { StatusDisplayType } from 'discord-api-types/v10';
+// import { StatusDisplayType } from 'discord-api-types/v10';
 
 import { discordService } from './main';
 import { singleton } from '@/providers/decorators';
