@@ -66,7 +66,7 @@ export const renderer = createRenderer<{
     });
 
     const checkRepeatState = () => {
-      // getState()   repeat mode
+      // getState() repeat mode
       const playerBar = document.querySelector<HTMLElement & { getState: () => any }>('ytmusic-player-bar');
 
       if (!playerBar || !playerBar.getState) {
