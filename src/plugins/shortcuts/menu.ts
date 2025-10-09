@@ -70,6 +70,7 @@ export const onMenu = async ({
     }
   }
 
+
   return [
     {
       label: t('plugins.shortcuts.menu.set-keybinds'),
