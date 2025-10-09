@@ -1,0 +1,207 @@
+:root{
+  --accent-color: #42e695;
+  --hint-color: rgba(255,255,255,0.42);
+  --panel-bg-alpha: 0.85;
+  --font-size: 26px;
+  --bold: 900;
+  --prevnext-h: 22px;
+  --panel-radius: 16px;
+}
+
+html, body{
+  margin:0; background:transparent;
+  font-family: ui-sans-serif, system-ui, "Segoe UI", "PingFang SC", "Microsoft Yahei";
+}
+
+#wrap{
+  position:fixed; inset:0;
+  display:flex; align-items:flex-end; justify-content:center;
+  pointer-events:none;
+  -webkit-app-region: drag;
+  z-index:1;
+}
+
+body.settings-open #wrap,
+body.locked #wrap{ -webkit-app-region: no-drag; }
+
+body.locked #panel::before{ -webkit-app-region: no-drag; }
+
+.no-drag{ -webkit-app-region: no-drag; pointer-events:auto; }
+
+/* Card */
+#panel{
+  position:relative;
+  margin:0 12px 18px;
+  max-width:92vw; min-width:720px;
+  border-radius:var(--panel-radius);
+  overflow:hidden;
+  pointer-events:auto; user-select:text;
+  padding:10px 28px 12px;
+  z-index:2;
+}
+#panel::before{
+  content:""; position:absolute; inset:0; border-radius:inherit;
+  background: rgba(8,8,10,var(--panel-bg-alpha));
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 14px 38px rgba(0,0,0,0.45);
+  pointer-events:none; z-index:-1;
+  -webkit-app-region: drag;           /* drag on background layer */
+}
+/* Opacity = 0 → remove any border/shadow to avoid lines */
+body.chrome-off #panel::before{
+  background:transparent; border:none; box-shadow:none;
+}
+
+/* Lyrics */
+#grid{
+  display:grid; grid-template-rows:var(--prevnext-h) auto var(--prevnext-h);
+  row-gap:6px; text-align:center;
+}
+.row{ display:flex; align-items:center; justify-content:center; min-height:0; }
+
+/* 上下行歌词 */
+.line-prev,.line-next{
+  font:700 14px/1.2 ui-sans-serif,system-ui,"PingFang SC";
+  color:var(--hint-color);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 当前行歌词 */
+.line-curr {
+  font-weight: var(--bold);
+  font-size: var(--font-size);
+  line-height: 1.25;
+  color: var(--accent-color);
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#subwrap{ margin-top:2px; }
+.line-sub{
+  font:700 13px/1.3 ui-sans-serif,system-ui,"PingFang SC";
+  color:rgba(255,255,255,.72);
+  text-align:center; white-space:pre-wrap;
+}
+.hidden{ visibility:hidden; }
+
+/* Gear */
+#gear{
+  position:absolute; top:8px; right:8px;
+  width:26px; height:26px;
+  display:grid; place-items:center;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:6px;
+  cursor:pointer;
+  z-index:3;
+}
+#gear svg{ width:16px; height:16px; fill:#fff; opacity:.95; }
+
+/* Settings panel — absolutely no border/shadow/backdrop so no lines */
+#panel-settings{
+  position:fixed; z-index:4;
+  width:360px; max-height:min(520px,72vh);
+  display:none;
+  background: rgba(24,24,26,.96);
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  border-radius: 14px;
+  pointer-events:auto;
+}
+#panel-settings.open{
+  display:flex; flex-direction:column;
+}
+
+.settings-header{
+  flex:0 0 auto;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:12px 14px;
+  background: rgba(24,24,26,.98);
+  border: 0 !important; box-shadow:none !important;
+}
+.settings-header .title{ color:#fff; font-size:12px; letter-spacing:.2px; opacity:.95; }
+.settings-header .close{
+  appearance:none; width:26px; height:26px; border-radius:8px;
+  display:grid; place-items:center; color:#fff; cursor:pointer;
+  border:none; background:rgba(255,255,255,.12);
+}
+
+/* Scrollable body */
+.settings-body{
+  flex:1 1 auto;
+  overflow-y:auto; overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
+  padding:12px 14px 14px;
+  color:#eee; font-size:13px;
+}
+.settings-body::-webkit-scrollbar{ width:8px; }
+.settings-body::-webkit-scrollbar-thumb{
+  background: rgba(255,255,255,0.18);
+  border-radius:6px;
+  border: none;
+}
+
+.rowset{ display:grid; grid-template-columns:110px 1fr; gap:8px; align-items:center; margin:10px 0; }
+.rowset label{ color:#cfd3da; font-size:12px; }
+
+/* Color input keep native look */
+.rowset input[type="color"]{ width: 100%; height: 30px; border: none; background: transparent; padding: 0; }
+
+/* Range input — slim and clean */
+.rowset input[type="range"]{
+  -webkit-appearance: none;
+  width:100%; height: 6px; border-radius: 999px;
+  background: rgba(255,255,255,.14);
+  outline: none; border:none;
+}
+.rowset input[type="range"]::-webkit-slider-thumb{
+  -webkit-appearance: none;
+  width: 14px; height: 14px; border-radius: 50%;
+  background: #fff; border: none; box-shadow: 0 0 0 2px rgba(0,0,0,.15);
+  margin-top: -4px;
+}
+.rowset input[type="range"]::-moz-range-thumb{
+  width:14px; height:14px; border-radius:50%;
+  background:#fff; border:none;
+}
+.rowset input[type="range"]::-moz-range-track{
+  height:6px; border-radius:999px; background: rgba(255,255,255,.14);
+}
+
+/* Segmented buttons — clear active/hover/focus */
+.seg{ display:grid; grid-auto-flow:column; gap:6px; }
+.seg button{
+  -webkit-appearance: none;
+  appearance: none;
+  height:28px; padding:0 10px; border-radius:6px;
+  cursor:pointer; color:#fff;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.12);
+  transition: background .15s, border-color .15s, box-shadow .15s, color .15s;
+}
+.seg button:hover{
+  background:rgba(255,255,255,.12);
+}
+.seg button:focus-visible{
+  outline:2px solid rgba(59,130,246,.65);
+  outline-offset:2px;
+}
+.seg button.active{
+  background:rgba(59,130,246,.28);
+  border-color:rgba(59,130,246,.55);
+  box-shadow: inset 0 0 0 1px rgba(59,130,246,.55);
+}
+
+/* Responsive */
+@media (max-width:1100px){
+  #panel{ min-width:86vw; }
+  .line-prev,.line-next{ font-size:13px; }
+  .line-curr{ font-size:calc(var(--font-size)*.9); }
+}
