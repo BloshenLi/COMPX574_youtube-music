@@ -66,170 +66,84 @@ export const renderer = createRenderer<{
     });
 
     const checkRepeatState = () => {
-      // Use title attribute which contains numeric mode info
-      const repeatButton = document.querySelector('.repeat') as HTMLElement;
-      if (repeatButton) {
-        const title = repeatButton.getAttribute('title') || '';
-        const ariaLabel = repeatButton.getAttribute('aria-label') || '';
+      // getState()   repeat mode
+      const playerBar = document.querySelector<HTMLElement & { getState: () => any }>('ytmusic-player-bar');
 
-        let mode = 'NONE';
-
-        // Check for repeat mode using title or other attributes
-        if (title.includes('1') || ariaLabel.toLowerCase().includes('one')) {
-          mode = 'ONE';
-        } else if (title.toLowerCase().includes('all') || ariaLabel.toLowerCase().includes('all')) {
-          mode = 'ALL';
-        }
-
-        ctx.ipc.send('ytmd:repeat-changed', mode);
+      if (!playerBar || !playerBar.getState) {
+        console.warn('[Quick Controls] ytmusic-player-bar or getState not found');
+        return;
       }
+
+      const state = playerBar.getState();
+      const mode = state?.queue?.repeatMode || 'NONE';
+
+      console.log(`[Quick Controls] Repeat mode from player-bar.getState(): ${mode}`);
+
+      ctx.ipc.send('ytmd:repeat-changed', mode);
     };
 
     const checkShuffleState = () => {
-      const playerBar = document.querySelector('ytmusic-player-bar');
-      let shuffleButton: HTMLElement | null = null;
+      // shuffle-on 
+      const playerBar = document.querySelector<HTMLElement>('ytmusic-player-bar');
 
-      if (playerBar) {
-        const possibleSelectors = [
-          'button[aria-pressed].shuffle',
-          '.shuffle-button[aria-pressed]',
-          'button[aria-pressed]',
-        ];
-
-        for (const selector of possibleSelectors) {
-          const candidate = playerBar.querySelector(selector) as HTMLElement;
-          if (candidate) {
-            if (candidate.hasAttribute('aria-pressed') || !shuffleButton) {
-              shuffleButton = candidate;
-              if (candidate.hasAttribute('aria-pressed')) {
-                break;
-              }
-            }
-          }
-        }
+      if (!playerBar) {
+        console.warn('[Quick Controls] ytmusic-player-bar not found');
+        return;
       }
 
-      if (!shuffleButton) {
-        const fallbackSelectors = [
-          '.shuffle',
-          '.shuffle-button'
-        ];
+      const isShuffled = playerBar.attributes.getNamedItem('shuffle-on') !== null;
 
-        for (const selector of fallbackSelectors) {
-          shuffleButton = document.querySelector(selector) as HTMLElement;
-          if (shuffleButton) {
-            break;
-          }
-        }
-      }
+      console.log(`[Quick Controls] Shuffle status from player-bar: shuffle-on=${isShuffled}`);
 
-      if (shuffleButton) {
-        const ariaPressed = shuffleButton.getAttribute('aria-pressed');
-
-        let isShuffled = false;
-
-        if (ariaPressed === 'true') {
-          isShuffled = true;
-        } else if (ariaPressed === 'false') {
-          isShuffled = false;
-        } else {
-          const hasActiveClass = shuffleButton.classList.contains('style-primary-text') ||
-                                shuffleButton.classList.contains('active') ||
-                                shuffleButton.classList.contains('shuffled') ||
-                                shuffleButton.classList.contains('enabled');
-
-          if (hasActiveClass) {
-            isShuffled = true;
-          } else {
-            const buttonStyle = window.getComputedStyle(shuffleButton);
-            if (buttonStyle.color) {
-              const colorMatch = buttonStyle.color.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
-              if (colorMatch) {
-                const [, r, g, b] = colorMatch.map(Number);
-                const brightness = (r + g + b) / 3;
-                isShuffled = brightness > 180;
-              }
-            }
-          }
-        }
-
-        ctx.ipc.send('ytmd:shuffle-changed', isShuffled);
-      } else {
-        console.warn('[Quick Controls] Shuffle button not found');
-      }
+      ctx.ipc.send('ytmd:shuffle-changed', isShuffled);
     };
 
     setTimeout(checkRepeatState, 3000);
     setTimeout(checkShuffleState, 3000);
     setTimeout(checkAndSendLikeStatus, 3000);
 
-    let currentLikeButtonObserver: MutationObserver | null = null;
-    let currentRendererObserver: MutationObserver | null = null;
+    let lastKnownLikeStatus: string | null = null;
+    const checkLikeStatusChange = () => {
+      const likeButtonRenderer = document.querySelector('#like-button-renderer') as any;
+
+      if (!likeButtonRenderer) {
+        return;
+      }
+
+      const currentStatus = likeButtonRenderer.likeStatus;
+
+      if (lastKnownLikeStatus !== null && lastKnownLikeStatus !== currentStatus) {
+        console.log(`[Quick Controls] Like status changed: ${lastKnownLikeStatus} -> ${currentStatus}`);
+        const isLiked = currentStatus === 'LIKE';
+        ctx.ipc.send('ytmd:like-status-changed', {
+          videoId: 'current',
+          isLiked: isLiked
+        });
+      }
+      lastKnownLikeStatus = currentStatus;
+    };
 
     const setupLikeButtonListener = () => {
-      if (currentLikeButtonObserver) {
-        currentLikeButtonObserver.disconnect();
-        currentLikeButtonObserver = null;
-      }
-      if (currentRendererObserver) {
-        currentRendererObserver.disconnect();
-        currentRendererObserver = null;
-      }
-
       console.log('[Quick Controls] Setting up like button listener...');
-      const likeButtonRenderer = document.querySelector('ytmusic-like-button-renderer');
+      const likeButtonRenderer = document.querySelector('#like-button-renderer') as any;
 
       if (!likeButtonRenderer) {
         setTimeout(setupLikeButtonListener, 1000);
         return;
       }
 
-      // First button with aria-pressed is Like, second is Dislike
-      const buttons = likeButtonRenderer.querySelectorAll('button[aria-pressed]');
+      lastKnownLikeStatus = likeButtonRenderer.likeStatus;
+
+      const buttons = document.querySelectorAll('#like-button-renderer button');
       const likeButton = buttons[0] as HTMLElement;
 
       if (likeButton) {
-        currentLikeButtonObserver = new MutationObserver((mutations) => {
-          mutations.forEach((mutation) => {
-            if (mutation.type === 'attributes' &&
-                (mutation.attributeName === 'aria-pressed' ||
-                 mutation.attributeName === 'aria-label' ||
-                 mutation.attributeName === 'class')) {
-              setTimeout(() => {
-                checkAndSendLikeStatus();
-              }, 200);
-            }
-          });
-        });
-
-        currentLikeButtonObserver.observe(likeButton, {
-          attributes: true,
-          attributeFilter: ['aria-pressed', 'aria-label', 'class']
-        });
-
         likeButton.addEventListener('click', () => {
-          console.log('[Quick Controls] Like button clicked, will update menu text');
+          console.log('[Quick Controls] Like button clicked, will update menu');
           setTimeout(() => {
-            console.log('[Quick Controls] Checking like status after click...');
-            checkAndSendLikeStatus(undefined, 1);
-          }, 800);
+            checkLikeStatusChange();
+          }, 300);
         });
-
-        if (likeButtonRenderer) {
-          currentRendererObserver = new MutationObserver((mutations) => {
-            mutations.forEach((mutation) => {
-              if (mutation.type === 'childList') {
-                console.log('[Quick Controls] Like button renderer changed, re-setting up listener');
-                setTimeout(setupLikeButtonListener, 500);
-              }
-            });
-          });
-
-          currentRendererObserver.observe(likeButtonRenderer, {
-            childList: true,
-            subtree: true
-          });
-        }
 
         console.log('[Quick Controls] Like button listener setup completed');
       } else {
@@ -262,65 +176,59 @@ export const renderer = createRenderer<{
       }
     };
 
+    let lastKnownRepeatMode: string | null = null;
+    const checkRepeatStateChange = () => {
+      const playerBar = document.querySelector<HTMLElement & { getState: () => any }>('ytmusic-player-bar');
+
+      if (!playerBar || !playerBar.getState) {
+        return;
+      }
+
+      const state = playerBar.getState();
+      const currentMode = state?.queue?.repeatMode || 'NONE';
+
+      if (lastKnownRepeatMode !== null && lastKnownRepeatMode !== currentMode) {
+        console.log(`[Quick Controls] Repeat mode changed: ${lastKnownRepeatMode} -> ${currentMode}`);
+        ctx.ipc.send('ytmd:repeat-changed', currentMode);
+      }
+      lastKnownRepeatMode = currentMode;
+    };
+
     let lastKnownShuffleState: boolean | null = null;
     const checkShuffleStateChange = () => {
-      const playerBar = document.querySelector('ytmusic-player-bar');
-      let shuffleButton: HTMLElement | null = null;
+      const playerBar = document.querySelector<HTMLElement>('ytmusic-player-bar');
 
-      if (playerBar) {
-        const possibleSelectors = [
-          'button[aria-pressed].shuffle',
-          '.shuffle-button[aria-pressed]',
-          'button[aria-pressed]'
-        ];
-
-        for (const selector of possibleSelectors) {
-          shuffleButton = playerBar.querySelector(selector) as HTMLElement;
-          if (shuffleButton) {
-            break;
-          }
-        }
+      if (!playerBar) {
+        return;
       }
 
-      if (shuffleButton) {
-        const ariaPressed = shuffleButton.getAttribute('aria-pressed');
-        let currentState = false;
+      const currentState = playerBar.attributes.getNamedItem('shuffle-on') !== null;
 
-        if (ariaPressed === 'true') {
-          currentState = true;
-        } else if (ariaPressed === 'false') {
-          currentState = false;
-        } else {
-          const hasActiveClass = shuffleButton.classList.contains('style-primary-text') ||
-                                shuffleButton.classList.contains('active');
-          if (hasActiveClass) {
-            currentState = true;
-          } else {
-            const buttonStyle = window.getComputedStyle(shuffleButton);
-            if (buttonStyle.color) {
-              const colorMatch = buttonStyle.color.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
-              if (colorMatch) {
-                const [, r, g, b] = colorMatch.map(Number);
-                const brightness = (r + g + b) / 3;
-                currentState = brightness > 180;
-              }
-            }
-          }
-        }
-
-        if (lastKnownShuffleState !== null && lastKnownShuffleState !== currentState) {
-          ctx.ipc.send('ytmd:shuffle-changed', currentState);
-        }
-        lastKnownShuffleState = currentState;
+      if (lastKnownShuffleState !== null && lastKnownShuffleState !== currentState) {
+        console.log(`[Quick Controls] Shuffle state changed: ${lastKnownShuffleState} -> ${currentState}`);
+        ctx.ipc.send('ytmd:shuffle-changed', currentState);
       }
+      lastKnownShuffleState = currentState;
     };
 
     setTimeout(setupLikeButtonListener, 3000);
     setTimeout(setupRepeatButtonListener, 3000);
 
+    
+    setTimeout(() => {
+      checkRepeatStateChange();
+      setInterval(checkRepeatStateChange, 2000);
+    }, 3000);
+
     setTimeout(() => {
       checkShuffleStateChange();
-      setInterval(checkShuffleStateChange, 3000);
+      setInterval(checkShuffleStateChange, 2000);
+    }, 3000);
+
+ 
+    setTimeout(() => {
+      checkLikeStatusChange();
+      setInterval(checkLikeStatusChange, 2000);
     }, 3000);
 
   },

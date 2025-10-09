@@ -221,27 +221,6 @@ export class LinuxController extends BasePlatformController {
       menuItem.checked = item.checked;
     }
 
-    // Do not set a shortcut key to avoid conflicts with YouTube Music's native shortcut keys.
-    // if (item.id) {
-    //   switch (item.id) {
-    //     case 'playPause':
-    //       menuItem.accelerator = 'Space';
-    //       break;
-
-    //     case 'previous':
-    //       menuItem.accelerator = 'Ctrl+Left';
-    //       break;
-
-    //     case 'next':
-    //       menuItem.accelerator = 'Ctrl+Right';
-    //       break;
-
-    //     case 'like':
-    //       menuItem.accelerator = 'Ctrl+L';
-    //       break;
-    //   }
-    // }
-
     return menuItem;
   }
 
