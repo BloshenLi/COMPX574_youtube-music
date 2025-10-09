@@ -125,25 +125,26 @@ export class MacOSController extends BasePlatformController {
       menuItem.checked = item.checked;
     }
 
-    if (item.id) {
-      switch (item.id) {
-        case 'playPause':
-          menuItem.accelerator = 'Space';
-          break;
+    // Do not set a shortcut key to avoid conflicts with YouTube Music's native shortcut keys.
+    // if (item.id) {
+    //   switch (item.id) {
+    //     case 'playPause':
+    //       menuItem.accelerator = 'Space';
+    //       break;
 
-        case 'previous':
-          menuItem.accelerator = 'Cmd+Left';
-          break;
+    //     case 'previous':
+    //       menuItem.accelerator = 'Cmd+Left';
+    //       break;
 
-        case 'next':
-          menuItem.accelerator = 'Cmd+Right';
-          break;
+    //     case 'next':
+    //       menuItem.accelerator = 'Cmd+Right';
+    //       break;
 
-        case 'like':
-          menuItem.accelerator = 'Cmd+L';
-          break;
-      }
-    }
+    //     case 'like':
+    //       menuItem.accelerator = 'Cmd+L';
+    //       break;
+    //   }
+    // }
 
     return menuItem;
   }
