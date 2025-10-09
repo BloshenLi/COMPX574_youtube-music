@@ -11,58 +11,31 @@ export const renderer = createRenderer<{
     this.ctx = ctx;
 
     const checkAndSendLikeStatus = (videoId?: string, retryCount: number = 0) => {
-      const likeButtonRenderer = document.querySelector('ytmusic-like-button-renderer');
+      // likeStatus 
+      const likeButtonRenderer = document.querySelector('#like-button-renderer') as any;
 
       if (!likeButtonRenderer) {
-        console.warn('[Quick Controls] ytmusic-like-button-renderer not found');
+        console.warn('[Quick Controls] #like-button-renderer not found');
         return;
       }
 
-      // First button with aria-pressed is Like, second is Dislike
-      const buttons = likeButtonRenderer.querySelectorAll('button[aria-pressed]');
-      const likeButton = buttons[0] as HTMLElement;
+      const likeStatus = likeButtonRenderer.likeStatus;
+      const isLiked = likeStatus === 'LIKE';
 
-      if (likeButton) {
-        const ariaPressed = likeButton.getAttribute('aria-pressed');
-        const ariaLabel = likeButton.getAttribute('aria-label') || '';
-        const title = likeButton.getAttribute('title') || '';
+      console.log(`[Quick Controls] Like status from renderer: likeStatus="${likeStatus}", isLiked=${isLiked}`);
 
-        const hasActiveClass = likeButton.classList.contains('style-primary-text') ||
-                              likeButton.classList.contains('active') ||
-                              likeButton.classList.contains('liked');
-
-        let isLiked = false;
-
-        console.log(`[Quick Controls] Button state detection: ariaPressed=${ariaPressed}, ariaLabel="${ariaLabel}", title="${title}", hasActiveClass=${hasActiveClass}`);
-
-        if (ariaPressed === 'true') {
-          isLiked = true;
-          console.log('[Quick Controls] Detected liked state from aria-pressed=true');
-        } else if (ariaPressed === 'false') {
-          isLiked = false;
-          console.log('[Quick Controls] Detected not liked state from aria-pressed=false');
-        } else if (hasActiveClass) {
-          isLiked = true;
-          console.log('[Quick Controls] Detected liked state from active CSS class');
-        } else {
-          console.log('[Quick Controls] No liked state indicators found, defaulting to not liked');
-        }
-
-        if (retryCount < 3 && ariaPressed === 'false' && retryCount > 0) {
-          setTimeout(() => {
-            checkAndSendLikeStatus(videoId, retryCount + 1);
-          }, 500 * (retryCount + 1));
-          return;
-        }
-
-        console.log(`[Quick Controls] Sending like status: videoId=${videoId || 'current'}, isLiked=${isLiked}`);
-        ctx.ipc.send('ytmd:like-status-changed', {
-          videoId: videoId || 'current',
-          isLiked: isLiked
-        });
-      } else {
-        console.warn('[Quick Controls] Like button not found');
+      if (!likeStatus && retryCount < 3) {
+        setTimeout(() => {
+          checkAndSendLikeStatus(videoId, retryCount + 1);
+        }, 500 * (retryCount + 1));
+        return;
       }
+
+      console.log(`[Quick Controls] Sending like status: videoId=${videoId || 'current'}, isLiked=${isLiked}`);
+      ctx.ipc.send('ytmd:like-status-changed', {
+        videoId: videoId || 'current',
+        isLiked: isLiked
+      });
     };
 
     ctx.ipc.on('ytmd:get-like-status', (videoId: string) => {
