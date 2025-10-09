@@ -1,24 +1,18 @@
 import prompt, { KeybindOptions } from 'custom-electron-prompt';
-
 import promptOptions from '@/providers/prompt-options';
-
 import { t } from '@/i18n';
-
 import type { ShortcutsPluginConfig } from './index';
 import type { BrowserWindow } from 'electron';
 import type { MenuContext } from '@/types/contexts';
 import type { MenuTemplate } from '@/menu';
 
 export const onMenu = async ({
-  window,
-  getConfig,
-  setConfig,
-}: MenuContext<ShortcutsPluginConfig>): Promise<MenuTemplate> => {
+                               window,
+                               getConfig,
+                               setConfig,
+                             }: MenuContext<ShortcutsPluginConfig>): Promise<MenuTemplate> => {
   const config = await getConfig();
 
-  /**
-   * Helper function for keybind prompt
-   */
   const kb = (
     label_: string,
     value_: string,
@@ -35,7 +29,6 @@ export const onMenu = async ({
         label: t('plugins.shortcuts.prompt.keybind.label'),
         type: 'keybind',
         keybindOptions: [
-          // If default=undefined then no default is used
           kb(
             t('plugins.shortcuts.prompt.keybind.keybind-options.previous'),
             'previous',
@@ -51,8 +44,18 @@ export const onMenu = async ({
             'next',
             config.global?.next,
           ),
+          kb(
+            'Forward 10s',
+            'forward10s',
+            (config as any).global?.forward10s,
+          ),
+          kb(
+            'Backward 10s',
+            'backward10s',
+            (config as any).global?.backward10s,
+          ),
         ],
-        height: 270,
+        height: 400,
         ...promptOptions(),
       },
       win,
@@ -60,15 +63,11 @@ export const onMenu = async ({
 
     if (output) {
       const newConfig = { ...config };
-
       for (const { value, accelerator } of output) {
-        newConfig.global[value as keyof ShortcutsPluginConfig['global']] =
-          accelerator;
+        (newConfig.global as any)[value] = accelerator;
       }
-
-      setConfig(config);
+      setConfig(newConfig);
     }
-    // Else -> pressed cancel
   }
 
   return [

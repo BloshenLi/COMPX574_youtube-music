@@ -7,7 +7,10 @@ export type ShortcutMappingType = {
   previous: string;
   playPause: string;
   next: string;
+  forward10s: string;
+  backward10s: string;
 };
+
 export type ShortcutsPluginConfig = {
   enabled: boolean;
   overrideMediaKeys: boolean;
@@ -26,14 +29,17 @@ export default createPlugin({
       previous: '',
       playPause: '',
       next: '',
+      forward10s: '',
+      backward10s: '',
     },
     local: {
       previous: '',
       playPause: '',
       next: '',
+      forward10s: '',
+      backward10s: '',
     },
   } as ShortcutsPluginConfig,
   menu: onMenu,
-
   backend: onMainLoad,
 });
