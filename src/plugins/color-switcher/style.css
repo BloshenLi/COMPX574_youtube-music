@@ -1,0 +1,36 @@
+:root {
+  --ytmusic-custom-background-color: lightpink;
+}
+
+body {
+  background-color: var(--ytmusic-custom-background-color) !important;
+  transition: background-color 0.4s ease-in-out !important;
+}
+
+#player-page,
+#nav-bar-background,
+#guide-wrapper,
+#mini-guide-background,
+ytmusic-app-layout {
+  background-color: var(--ytmusic-custom-background-color) !important;
+  transition: background-color 0.4s ease-in-out !important;
+}
+
+ytmusic-player-bar {
+  background: var(--ytmusic-custom-background-color) !important;
+  color: white !important;
+  transition: background-color 0.4s ease-in-out !important;
+}
+
+ytmusic-app-layout #content {
+  background-color: var(--ytmusic-custom-background-color) !important;
+  transition: background-color 0.4s ease-in-out !important;
+}
+
+ytmusic-browse-response[has-background]:not([disable-gradient]) .background-gradient.ytmusic-browse-response {
+  background: unset !important;
+}
+
+#background.immersive-background.style-scope.ytmusic-browse-response {
+  opacity: 0.6;
+}
