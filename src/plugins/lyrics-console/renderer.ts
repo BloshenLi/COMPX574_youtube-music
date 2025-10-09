@@ -30,7 +30,6 @@ declare global {
   }
 }
 
-/** ====== 常量与小工具 ====== */
 const POLL_MS = 2000;
 const TICK_MS = 120;
 const PRELUDE = 0.6;

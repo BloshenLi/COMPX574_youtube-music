@@ -1,12 +1,17 @@
-import { BrowserWindow, screen, app } from 'electron';
 import path from 'path';
 import fs from 'fs';
+
+import { BrowserWindow, screen, app } from 'electron';
+
 import { createBackend } from '@/utils';
 
 /* --------------------------- 轻量类型声明 --------------------------- */
 interface BackendContext {
   ipc: {
-    handle: (channel: string, listener: (...args: unknown[]) => unknown | Promise<unknown>) => void;
+    handle: (
+      channel: string,
+      listener: (...args: unknown[]) => unknown | Promise<unknown>,
+    ) => void;
     on: (channel: string, listener: (...args: unknown[]) => void) => void;
   };
 }
@@ -51,7 +56,10 @@ function resolveOverlayHtmlPath(): string {
   const p1 = path.join(__dirname, 'overlay.html');
   if (fs.existsSync(p1)) return p1;
 
-  const p2 = path.join(process.cwd(), 'src/plugins/lyrics-console/overlay.html');
+  const p2 = path.join(
+    process.cwd(),
+    'src/plugins/lyrics-console/overlay.html',
+  );
   if (fs.existsSync(p2)) return p2;
 
   return path.resolve('overlay.html');
@@ -141,7 +149,9 @@ export const backend = createBackend({
 
     ctx.ipc.on('lyrics-console:set-line', async (...args: unknown[]) => {
       const raw = args[0];
-      const text = String((raw as { text?: unknown } | null)?.text ?? raw ?? '');
+      const text = String(
+        (raw as { text?: unknown } | null)?.text ?? raw ?? '',
+      );
       if (!text) return;
       await setLine(text);
     });
@@ -185,11 +195,15 @@ export const backend = createBackend({
         const url =
           typeof req === 'string'
             ? req
-            : req && typeof req === 'object' && 'url' in (req as Record<string, unknown>)
+            : req &&
+                typeof req === 'object' &&
+                'url' in (req as Record<string, unknown>)
               ? String((req as Record<string, unknown>).url)
               : '';
         const init =
-          req && typeof req === 'object' && 'init' in (req as Record<string, unknown>)
+          req &&
+          typeof req === 'object' &&
+          'init' in (req as Record<string, unknown>)
             ? (req as Record<string, unknown>).init
             : undefined;
 
