@@ -1,15 +1,16 @@
 // Menu builder for creating standardized menu items
 import type { BrowserWindow } from 'electron';
-import { getSongControls } from '@/providers/song-controls';
-import { t } from '@/i18n';
 
+import { t } from '@/i18n';
+import { getSongControls } from '@/providers/song-controls';
+
+import { RepeatMode } from '../types';
 import type {
   IMenuBuilder,
   MenuItemConfig,
   PlayerState,
   QuickControlsConfig,
 } from '../types';
-import { RepeatMode } from '../types';
 
 export class MenuBuilder implements IMenuBuilder {
   private songControls: ReturnType<typeof getSongControls>;

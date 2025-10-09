@@ -1,6 +1,8 @@
 // Quick Controls renderer script
-import { createRenderer } from '@/utils';
 import type { RendererContext } from '@/types/contexts';
+
+import { createRenderer } from '@/utils';
+
 import type { QuickControlsConfig } from './types';
 
 export const renderer = createRenderer<
@@ -9,7 +11,7 @@ export const renderer = createRenderer<
   },
   QuickControlsConfig
 >({
-  async start(ctx: RendererContext<QuickControlsConfig>) {
+  start(ctx: RendererContext<QuickControlsConfig>) {
     this.ctx = ctx;
 
     const checkAndSendLikeStatus = (

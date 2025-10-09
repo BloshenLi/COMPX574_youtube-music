@@ -1,14 +1,15 @@
 // Player state manager for tracking YouTube Music player state
 import type { BrowserWindow } from 'electron';
 import { ipcMain } from 'electron';
+
 import {
   registerCallback,
   SongInfoEvent,
   type SongInfoCallback,
 } from '@/providers/song-info';
 
-import type { IStateManager, PlayerState } from '../types';
 import { RepeatMode } from '../types';
+import type { IStateManager, PlayerState } from '../types';
 
 export class StateManager implements IStateManager {
   private stateCallbacks: Set<(state: PlayerState) => void> = new Set();

@@ -1,9 +1,9 @@
 // Quick Controls plugin entry
-import { createPlugin } from '@/utils';
 import { t } from '@/i18n';
+import { createPlugin } from '@/utils';
+
 import { onBackendLoad } from './backend';
 import { renderer } from './renderer';
-
 import type { QuickControlsConfig } from './types';
 
 export default createPlugin({

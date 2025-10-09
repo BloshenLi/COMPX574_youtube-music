@@ -8,13 +8,13 @@ import {
 } from 'electron';
 import is from 'electron-is';
 import * as path from 'path';
+
 import { t } from '@/i18n';
 
 import { BasePlatformController } from './base';
-import { StateManager } from '../utils/state-manager';
-import { MenuBuilder } from '../utils/menu-builder';
-
 import type { MenuItemConfig } from '../types';
+import { MenuBuilder } from '../utils/menu-builder';
+import { StateManager } from '../utils/state-manager';
 
 export class WindowsController extends BasePlatformController {
   private tray: Tray | null = null;

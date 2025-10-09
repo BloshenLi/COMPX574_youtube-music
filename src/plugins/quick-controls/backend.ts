@@ -1,7 +1,9 @@
 // Quick Controls plugin backend
 import is from 'electron-is';
-import type { QuickControlsConfig } from './types';
+
 import type { BackendContext } from '@/types/contexts';
+
+import type { QuickControlsConfig } from './types';
 
 const getPlatformController = async () => {
   if (is.macOS()) {
