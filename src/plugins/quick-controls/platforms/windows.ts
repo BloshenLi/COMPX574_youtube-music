@@ -1,5 +1,11 @@
 // Windows system tray menu implementation
-import { app, Menu, Tray, nativeImage, type MenuItemConstructorOptions } from 'electron';
+import {
+  app,
+  Menu,
+  Tray,
+  nativeImage,
+  type MenuItemConstructorOptions,
+} from 'electron';
 import is from 'electron-is';
 import * as path from 'path';
 import { t } from '@/i18n';
@@ -56,15 +62,21 @@ export class WindowsController extends BasePlatformController {
       const icon = nativeImage.createFromPath(iconPath);
 
       if (icon.isEmpty()) {
-        console.warn('[Windows] Tray icon not found, creating default red YouTube Music icon');
-        const defaultIconData = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAANxSURBVFhH7ZdLaBNBFIYnbYo1aqMiKCKIChYVwQcqvhBBUVBwIYILQVy4cOHChQsXLly4cOHChQsXLly4cOHChQsXLly4cOHChQsXLly4cOHChQsXLly4cOHChQsXLly4cOHChQsXLly4cOHChQsXLly4cOHChQsXLly4cOHChQsXLly4cOHChQsXLly4cOHChQsXLgRBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEAT/gP8ApFUjTwAAAABJRU5ErkJggg==';
+        console.warn(
+          '[Windows] Tray icon not found, creating default red YouTube Music icon',
+        );
+        const defaultIconData =
+          'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAANxSURBVFhH7ZdLaBNBFIYnbYo1aqMiKCKIChYVwQcqvhBBUVBwIYILQVy4cOHChQsXLly4cOHChQsXLly4cOHChQsXLly4cOHChQsXLly4cOHChQsXLly4cOHChQsXLly4cOHChQsXLly4cOHChQsXLly4cOHChQsXLly4cOHChQsXLly4cOHChQsXLly4cOHChQsXLgRBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEARBEAT/gP8ApFUjTwAAAABJRU5ErkJggg==';
         const defaultIcon = nativeImage.createFromDataURL(defaultIconData);
         this.tray = new Tray(defaultIcon);
       } else {
         this.tray = new Tray(icon);
       }
 
-      this.tray.setToolTip(t('plugins.quick-controls.platform.tray-tooltip') || 'YouTube Music - Quick Controls');
+      this.tray.setToolTip(
+        t('plugins.quick-controls.platform.tray-tooltip') ||
+          'YouTube Music - Quick Controls',
+      );
 
       this.tray.on('double-click', () => {
         if (this.window) {
@@ -88,8 +100,25 @@ export class WindowsController extends BasePlatformController {
     const fs = require('fs');
 
     const possiblePaths = [
-      path.join(__dirname, '..', '..', '..', 'assets', 'youtube-music-tray.png'),
-      path.join(__dirname, '..', '..', '..', 'assets', 'generated', 'icons', 'win', 'icon.ico'),
+      path.join(
+        __dirname,
+        '..',
+        '..',
+        '..',
+        'assets',
+        'youtube-music-tray.png',
+      ),
+      path.join(
+        __dirname,
+        '..',
+        '..',
+        '..',
+        'assets',
+        'generated',
+        'icons',
+        'win',
+        'icon.ico',
+      ),
       path.join(__dirname, '..', '..', '..', 'assets', 'youtube-music.png'),
       path.join(process.cwd(), 'assets', 'youtube-music-tray.png'),
       path.join(process.cwd(), 'assets', 'youtube-music.png'),
@@ -109,36 +138,44 @@ export class WindowsController extends BasePlatformController {
     return possiblePaths[0];
   }
 
-  protected async platformSpecificCreateMenu(items: MenuItemConfig[]): Promise<void> {
+  protected async platformSpecificCreateMenu(
+    items: MenuItemConfig[],
+  ): Promise<void> {
     try {
-      console.log(`[Windows] Creating tray menu with ${items.length} menu items`);
+      console.log(
+        `[Windows] Creating tray menu with ${items.length} menu items`,
+      );
 
-      const likeItem = items.find(item => item.id === 'like');
+      const likeItem = items.find((item) => item.id === 'like');
       if (likeItem) {
-        console.log(`[Windows] Like button state: enabled=${likeItem.enabled}, label="${likeItem.label}"`);
+        console.log(
+          `[Windows] Like button state: enabled=${likeItem.enabled}, label="${likeItem.label}"`,
+        );
       }
 
-      const menuTemplate: MenuItemConstructorOptions[] = items.map(item =>
-        this.convertToElectronMenuItem(item)
+      const menuTemplate: MenuItemConstructorOptions[] = items.map((item) =>
+        this.convertToElectronMenuItem(item),
       );
 
       menuTemplate.push(
         { type: 'separator' },
         {
-          label: t('plugins.quick-controls.platform.show-window') || 'Show YouTube Music',
+          label:
+            t('plugins.quick-controls.platform.show-window') ||
+            'Show YouTube Music',
           click: () => {
             if (this.window) {
               this.window.show();
               this.window.focus();
             }
-          }
+          },
         },
         {
           label: t('plugins.quick-controls.platform.exit') || 'Exit',
           click: () => {
             app.quit();
-          }
-        }
+          },
+        },
       );
 
       this.trayMenu = Menu.buildFromTemplate(menuTemplate);
@@ -180,25 +217,32 @@ export class WindowsController extends BasePlatformController {
     }
   }
 
-  private convertToElectronMenuItem(item: MenuItemConfig): MenuItemConstructorOptions {
+  private convertToElectronMenuItem(
+    item: MenuItemConfig,
+  ): MenuItemConstructorOptions {
     if (item.separator) {
       return { type: 'separator' };
     }
 
     const menuItem: MenuItemConstructorOptions = {
       label: item.label,
-      enabled: item.enabled !== false
+      enabled: item.enabled !== false,
     };
 
     if (item.submenu && item.submenu.length > 0) {
-      menuItem.submenu = item.submenu.map(subItem => this.convertToElectronMenuItem(subItem));
+      menuItem.submenu = item.submenu.map((subItem) =>
+        this.convertToElectronMenuItem(subItem),
+      );
     } else {
       menuItem.click = () => {
         try {
           console.log(`[Windows] Executing menu item action: ${item.id}`);
           item.action();
         } catch (error) {
-          console.error(`[Windows] Menu item action failed (${item.id}):`, error);
+          console.error(
+            `[Windows] Menu item action failed (${item.id}):`,
+            error,
+          );
         }
       };
     }
@@ -217,7 +261,9 @@ export class WindowsController extends BasePlatformController {
 
   async refreshTrayMenu(): Promise<void> {
     if (!this.isInitialized) {
-      console.warn('[Windows] Controller not initialized, cannot refresh tray menu');
+      console.warn(
+        '[Windows] Controller not initialized, cannot refresh tray menu',
+      );
       return;
     }
 

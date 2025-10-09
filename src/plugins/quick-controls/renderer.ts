@@ -3,16 +3,23 @@ import { createRenderer } from '@/utils';
 import type { RendererContext } from '@/types/contexts';
 import type { QuickControlsConfig } from './types';
 
-export const renderer = createRenderer<{
-  ctx?: RendererContext<QuickControlsConfig>;
-}, QuickControlsConfig>({
-
+export const renderer = createRenderer<
+  {
+    ctx?: RendererContext<QuickControlsConfig>;
+  },
+  QuickControlsConfig
+>({
   async start(ctx: RendererContext<QuickControlsConfig>) {
     this.ctx = ctx;
 
-    const checkAndSendLikeStatus = (videoId?: string, retryCount: number = 0) => {
-      // likeStatus 
-      const likeButtonRenderer = document.querySelector('#like-button-renderer') as any;
+    const checkAndSendLikeStatus = (
+      videoId?: string,
+      retryCount: number = 0,
+    ) => {
+      // likeStatus
+      const likeButtonRenderer = document.querySelector(
+        '#like-button-renderer',
+      ) as any;
 
       if (!likeButtonRenderer) {
         console.warn('[Quick Controls] #like-button-renderer not found');
@@ -22,28 +29,39 @@ export const renderer = createRenderer<{
       const likeStatus = likeButtonRenderer.likeStatus;
       const isLiked = likeStatus === 'LIKE';
 
-      console.log(`[Quick Controls] Like status from renderer: likeStatus="${likeStatus}", isLiked=${isLiked}`);
+      console.log(
+        `[Quick Controls] Like status from renderer: likeStatus="${likeStatus}", isLiked=${isLiked}`,
+      );
 
       if (!likeStatus && retryCount < 3) {
-        setTimeout(() => {
-          checkAndSendLikeStatus(videoId, retryCount + 1);
-        }, 500 * (retryCount + 1));
+        setTimeout(
+          () => {
+            checkAndSendLikeStatus(videoId, retryCount + 1);
+          },
+          500 * (retryCount + 1),
+        );
         return;
       }
 
-      console.log(`[Quick Controls] Sending like status: videoId=${videoId || 'current'}, isLiked=${isLiked}`);
+      console.log(
+        `[Quick Controls] Sending like status: videoId=${videoId || 'current'}, isLiked=${isLiked}`,
+      );
       ctx.ipc.send('ytmd:like-status-changed', {
         videoId: videoId || 'current',
-        isLiked: isLiked
+        isLiked: isLiked,
       });
     };
 
     ctx.ipc.on('ytmd:get-like-status', (videoId: string) => {
-      console.log(`[Quick Controls] Received get-like-status request for videoId: ${videoId}`);
+      console.log(
+        `[Quick Controls] Received get-like-status request for videoId: ${videoId}`,
+      );
       checkAndSendLikeStatus(videoId);
 
       if (videoId && videoId !== 'startup') {
-        console.log('[Quick Controls] Song changed, re-setting up like button listener');
+        console.log(
+          '[Quick Controls] Song changed, re-setting up like button listener',
+        );
         setTimeout(setupLikeButtonListener, 1000);
       }
     });
@@ -67,33 +85,43 @@ export const renderer = createRenderer<{
 
     const checkRepeatState = () => {
       // getState() repeat mode
-      const playerBar = document.querySelector<HTMLElement & { getState: () => any }>('ytmusic-player-bar');
+      const playerBar = document.querySelector<
+        HTMLElement & { getState: () => any }
+      >('ytmusic-player-bar');
 
       if (!playerBar || !playerBar.getState) {
-        console.warn('[Quick Controls] ytmusic-player-bar or getState not found');
+        console.warn(
+          '[Quick Controls] ytmusic-player-bar or getState not found',
+        );
         return;
       }
 
       const state = playerBar.getState();
       const mode = state?.queue?.repeatMode || 'NONE';
 
-      console.log(`[Quick Controls] Repeat mode from player-bar.getState(): ${mode}`);
+      console.log(
+        `[Quick Controls] Repeat mode from player-bar.getState(): ${mode}`,
+      );
 
       ctx.ipc.send('ytmd:repeat-changed', mode);
     };
 
     const checkShuffleState = () => {
-      // shuffle-on 
-      const playerBar = document.querySelector<HTMLElement>('ytmusic-player-bar');
+      // shuffle-on
+      const playerBar =
+        document.querySelector<HTMLElement>('ytmusic-player-bar');
 
       if (!playerBar) {
         console.warn('[Quick Controls] ytmusic-player-bar not found');
         return;
       }
 
-      const isShuffled = playerBar.attributes.getNamedItem('shuffle-on') !== null;
+      const isShuffled =
+        playerBar.attributes.getNamedItem('shuffle-on') !== null;
 
-      console.log(`[Quick Controls] Shuffle status from player-bar: shuffle-on=${isShuffled}`);
+      console.log(
+        `[Quick Controls] Shuffle status from player-bar: shuffle-on=${isShuffled}`,
+      );
 
       ctx.ipc.send('ytmd:shuffle-changed', isShuffled);
     };
@@ -104,7 +132,9 @@ export const renderer = createRenderer<{
 
     let lastKnownLikeStatus: string | null = null;
     const checkLikeStatusChange = () => {
-      const likeButtonRenderer = document.querySelector('#like-button-renderer') as any;
+      const likeButtonRenderer = document.querySelector(
+        '#like-button-renderer',
+      ) as any;
 
       if (!likeButtonRenderer) {
         return;
@@ -112,12 +142,17 @@ export const renderer = createRenderer<{
 
       const currentStatus = likeButtonRenderer.likeStatus;
 
-      if (lastKnownLikeStatus !== null && lastKnownLikeStatus !== currentStatus) {
-        console.log(`[Quick Controls] Like status changed: ${lastKnownLikeStatus} -> ${currentStatus}`);
+      if (
+        lastKnownLikeStatus !== null &&
+        lastKnownLikeStatus !== currentStatus
+      ) {
+        console.log(
+          `[Quick Controls] Like status changed: ${lastKnownLikeStatus} -> ${currentStatus}`,
+        );
         const isLiked = currentStatus === 'LIKE';
         ctx.ipc.send('ytmd:like-status-changed', {
           videoId: 'current',
-          isLiked: isLiked
+          isLiked: isLiked,
         });
       }
       lastKnownLikeStatus = currentStatus;
@@ -125,7 +160,9 @@ export const renderer = createRenderer<{
 
     const setupLikeButtonListener = () => {
       console.log('[Quick Controls] Setting up like button listener...');
-      const likeButtonRenderer = document.querySelector('#like-button-renderer') as any;
+      const likeButtonRenderer = document.querySelector(
+        '#like-button-renderer',
+      ) as any;
 
       if (!likeButtonRenderer) {
         setTimeout(setupLikeButtonListener, 1000);
@@ -156,8 +193,11 @@ export const renderer = createRenderer<{
       if (repeatButton) {
         const observer = new MutationObserver((mutations) => {
           mutations.forEach((mutation) => {
-            if (mutation.type === 'attributes' &&
-                (mutation.attributeName === 'aria-label' || mutation.attributeName === 'aria-pressed')) {
+            if (
+              mutation.type === 'attributes' &&
+              (mutation.attributeName === 'aria-label' ||
+                mutation.attributeName === 'aria-pressed')
+            ) {
               setTimeout(checkRepeatState, 100);
             }
           });
@@ -165,7 +205,7 @@ export const renderer = createRenderer<{
 
         observer.observe(repeatButton, {
           attributes: true,
-          attributeFilter: ['aria-label', 'aria-pressed']
+          attributeFilter: ['aria-label', 'aria-pressed'],
         });
 
         repeatButton.addEventListener('click', () => {
@@ -178,7 +218,9 @@ export const renderer = createRenderer<{
 
     let lastKnownRepeatMode: string | null = null;
     const checkRepeatStateChange = () => {
-      const playerBar = document.querySelector<HTMLElement & { getState: () => any }>('ytmusic-player-bar');
+      const playerBar = document.querySelector<
+        HTMLElement & { getState: () => any }
+      >('ytmusic-player-bar');
 
       if (!playerBar || !playerBar.getState) {
         return;
@@ -188,7 +230,9 @@ export const renderer = createRenderer<{
       const currentMode = state?.queue?.repeatMode || 'NONE';
 
       if (lastKnownRepeatMode !== null && lastKnownRepeatMode !== currentMode) {
-        console.log(`[Quick Controls] Repeat mode changed: ${lastKnownRepeatMode} -> ${currentMode}`);
+        console.log(
+          `[Quick Controls] Repeat mode changed: ${lastKnownRepeatMode} -> ${currentMode}`,
+        );
         ctx.ipc.send('ytmd:repeat-changed', currentMode);
       }
       lastKnownRepeatMode = currentMode;
@@ -196,16 +240,23 @@ export const renderer = createRenderer<{
 
     let lastKnownShuffleState: boolean | null = null;
     const checkShuffleStateChange = () => {
-      const playerBar = document.querySelector<HTMLElement>('ytmusic-player-bar');
+      const playerBar =
+        document.querySelector<HTMLElement>('ytmusic-player-bar');
 
       if (!playerBar) {
         return;
       }
 
-      const currentState = playerBar.attributes.getNamedItem('shuffle-on') !== null;
+      const currentState =
+        playerBar.attributes.getNamedItem('shuffle-on') !== null;
 
-      if (lastKnownShuffleState !== null && lastKnownShuffleState !== currentState) {
-        console.log(`[Quick Controls] Shuffle state changed: ${lastKnownShuffleState} -> ${currentState}`);
+      if (
+        lastKnownShuffleState !== null &&
+        lastKnownShuffleState !== currentState
+      ) {
+        console.log(
+          `[Quick Controls] Shuffle state changed: ${lastKnownShuffleState} -> ${currentState}`,
+        );
         ctx.ipc.send('ytmd:shuffle-changed', currentState);
       }
       lastKnownShuffleState = currentState;
@@ -214,7 +265,6 @@ export const renderer = createRenderer<{
     setTimeout(setupLikeButtonListener, 3000);
     setTimeout(setupRepeatButtonListener, 3000);
 
-    
     setTimeout(() => {
       checkRepeatStateChange();
       setInterval(checkRepeatStateChange, 2000);
@@ -225,14 +275,11 @@ export const renderer = createRenderer<{
       setInterval(checkShuffleStateChange, 2000);
     }, 3000);
 
- 
     setTimeout(() => {
       checkLikeStatusChange();
       setInterval(checkLikeStatusChange, 2000);
     }, 3000);
-
   },
 
-  stop() {
-  }
+  stop() {},
 });

@@ -6,7 +6,7 @@ import type {
   PlayerState,
   QuickControlsConfig,
   IStateManager,
-  IMenuBuilder
+  IMenuBuilder,
 } from '../types';
 
 export abstract class BasePlatformController implements IPlatformController {
@@ -17,9 +17,14 @@ export abstract class BasePlatformController implements IPlatformController {
   protected currentState: PlayerState | null = null;
   protected isInitialized: boolean = false;
 
-  async initialize(window: BrowserWindow, config: QuickControlsConfig): Promise<void> {
+  async initialize(
+    window: BrowserWindow,
+    config: QuickControlsConfig,
+  ): Promise<void> {
     try {
-      console.log(`[${this.getPlatformName()}] Initializing platform controller`);
+      console.log(
+        `[${this.getPlatformName()}] Initializing platform controller`,
+      );
 
       this.window = window;
       this.config = config;
@@ -30,22 +35,31 @@ export abstract class BasePlatformController implements IPlatformController {
       this.isInitialized = true;
       await this.refreshMenu();
 
-      console.log(`[${this.getPlatformName()}] Platform controller initialized`);
+      console.log(
+        `[${this.getPlatformName()}] Platform controller initialized`,
+      );
     } catch (error) {
-      console.error(`[${this.getPlatformName()}] Initialization failed:`, error);
+      console.error(
+        `[${this.getPlatformName()}] Initialization failed:`,
+        error,
+      );
       throw error;
     }
   }
 
   async createMenu(items: MenuItemConfig[]): Promise<void> {
     if (!this.isInitialized) {
-      console.warn(`[${this.getPlatformName()}] Controller not initialized, cannot create menu`);
+      console.warn(
+        `[${this.getPlatformName()}] Controller not initialized, cannot create menu`,
+      );
       return;
     }
 
     try {
       await this.platformSpecificCreateMenu(items);
-      console.log(`[${this.getPlatformName()}] Menu updated successfully with ${items.length} items`);
+      console.log(
+        `[${this.getPlatformName()}] Menu updated successfully with ${items.length} items`,
+      );
     } catch (error) {
       console.error(`[${this.getPlatformName()}] Menu creation failed:`, error);
       throw error;
@@ -57,7 +71,9 @@ export abstract class BasePlatformController implements IPlatformController {
       const hasStateChanged = this.hasPlayerStateChanged(state);
 
       if (!hasStateChanged) {
-        console.log(`[${this.getPlatformName()}] No state change detected, skipping menu refresh`);
+        console.log(
+          `[${this.getPlatformName()}] No state change detected, skipping menu refresh`,
+        );
         return;
       }
 
@@ -67,14 +83,19 @@ export abstract class BasePlatformController implements IPlatformController {
         isShuffled: state.isShuffled,
         isLiked: state.isLiked,
         canLike: state.canLike,
-        hasCurrentSong: state.hasCurrentSong
+        hasCurrentSong: state.hasCurrentSong,
       });
 
-      console.log(`[${this.getPlatformName()}] Previous state:`, this.currentState ? {
-        isLiked: this.currentState.isLiked,
-        canLike: this.currentState.canLike,
-        hasCurrentSong: this.currentState.hasCurrentSong
-      } : 'null');
+      console.log(
+        `[${this.getPlatformName()}] Previous state:`,
+        this.currentState
+          ? {
+              isLiked: this.currentState.isLiked,
+              canLike: this.currentState.canLike,
+              hasCurrentSong: this.currentState.hasCurrentSong,
+            }
+          : 'null',
+      );
 
       this.currentState = { ...state };
       await this.refreshMenu();
@@ -106,27 +127,34 @@ export abstract class BasePlatformController implements IPlatformController {
   abstract getPlatformName(): string;
   abstract isSupported(): boolean;
   protected abstract platformSpecificInitialize(): Promise<void>;
-  protected abstract platformSpecificCreateMenu(items: MenuItemConfig[]): Promise<void>;
+  protected abstract platformSpecificCreateMenu(
+    items: MenuItemConfig[],
+  ): Promise<void>;
   protected abstract platformSpecificDestroy(): Promise<void>;
   protected abstract initializeComponents(): Promise<void>;
 
   protected async refreshMenu(): Promise<void> {
     if (!this.menuBuilder || !this.config) {
-      console.warn(`[${this.getPlatformName()}] Menu builder or config not initialized`);
+      console.warn(
+        `[${this.getPlatformName()}] Menu builder or config not initialized`,
+      );
       return;
     }
 
     try {
-      const state = this.currentState || await this.getCurrentPlayerState();
+      const state = this.currentState || (await this.getCurrentPlayerState());
 
       console.log(`[${this.getPlatformName()}] Refreshing menu with state:`, {
         isLiked: state.isLiked,
         canLike: state.canLike,
         hasCurrentSong: state.hasCurrentSong,
-        isPlaying: state.isPlaying
+        isPlaying: state.isPlaying,
       });
 
-      const menuItems = await this.menuBuilder.buildFullMenu(state, this.config);
+      const menuItems = await this.menuBuilder.buildFullMenu(
+        state,
+        this.config,
+      );
       await this.createMenu(menuItems);
     } catch (error) {
       console.error(`[${this.getPlatformName()}] Menu refresh failed:`, error);

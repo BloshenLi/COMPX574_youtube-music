@@ -20,7 +20,7 @@ export interface PlayerState {
 export enum RepeatMode {
   OFF = 'off',
   ONE = 'one',
-  ALL = 'all'
+  ALL = 'all',
 }
 
 export interface MenuItemConfig {
@@ -32,7 +32,6 @@ export interface MenuItemConfig {
   separator?: boolean;
   submenu?: MenuItemConfig[];
 }
-
 
 export interface IPlatformController {
   initialize(window: any, config: QuickControlsConfig): Promise<void>;
@@ -53,5 +52,8 @@ export interface IStateManager {
 export interface IMenuBuilder {
   buildPlaybackControls(state: PlayerState): Promise<MenuItemConfig[]>;
   buildAdvancedControls(state: PlayerState): Promise<MenuItemConfig[]>;
-  buildFullMenu(state: PlayerState, config: QuickControlsConfig): Promise<MenuItemConfig[]>;
+  buildFullMenu(
+    state: PlayerState,
+    config: QuickControlsConfig,
+  ): Promise<MenuItemConfig[]>;
 }

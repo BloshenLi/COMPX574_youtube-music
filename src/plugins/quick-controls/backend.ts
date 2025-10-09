@@ -14,11 +14,16 @@ const getPlatformController = async () => {
     const { LinuxController } = await import('./platforms/linux');
     return new LinuxController();
   } else {
-    throw new Error('Platform not supported. Only macOS, Windows and Linux are currently supported.');
+    throw new Error(
+      'Platform not supported. Only macOS, Windows and Linux are currently supported.',
+    );
   }
 };
 
-export const onBackendLoad = async ({ getConfig, window }: BackendContext<QuickControlsConfig>) => {
+export const onBackendLoad = async ({
+  getConfig,
+  window,
+}: BackendContext<QuickControlsConfig>) => {
   console.log('[Quick Controls] loading');
 
   const config = await getConfig();

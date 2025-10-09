@@ -1,12 +1,13 @@
 // Player state manager for tracking YouTube Music player state
 import type { BrowserWindow } from 'electron';
 import { ipcMain } from 'electron';
-import { registerCallback, SongInfoEvent, type SongInfoCallback } from '@/providers/song-info';
+import {
+  registerCallback,
+  SongInfoEvent,
+  type SongInfoCallback,
+} from '@/providers/song-info';
 
-import type {
-  IStateManager,
-  PlayerState
-} from '../types';
+import type { IStateManager, PlayerState } from '../types';
 import { RepeatMode } from '../types';
 
 export class StateManager implements IStateManager {
@@ -40,7 +41,7 @@ export class StateManager implements IStateManager {
         canLike: false,
         hasCurrentSong: false,
         isLiked: false,
-        isShuffled: false
+        isShuffled: false,
       };
 
       if (this.currentState) {
@@ -56,7 +57,7 @@ export class StateManager implements IStateManager {
         canLike: false,
         hasCurrentSong: false,
         isLiked: false,
-        isShuffled: false
+        isShuffled: false,
       };
     }
   }
@@ -80,7 +81,10 @@ export class StateManager implements IStateManager {
   private setupSongInfoListener(): void {
     this.songInfoCallback = (songInfo, event) => {
       try {
-        if (event === SongInfoEvent.PlayOrPaused || event === SongInfoEvent.VideoSrcChanged) {
+        if (
+          event === SongInfoEvent.PlayOrPaused ||
+          event === SongInfoEvent.VideoSrcChanged
+        ) {
           let isLiked = this.currentState?.isLiked || false;
 
           if (event === SongInfoEvent.VideoSrcChanged) {
@@ -94,7 +98,7 @@ export class StateManager implements IStateManager {
             canLike: !!songInfo.title,
             hasCurrentSong: !!songInfo.title,
             isLiked: isLiked,
-            isShuffled: this.currentState?.isShuffled || false
+            isShuffled: this.currentState?.isShuffled || false,
           };
 
           if (event === SongInfoEvent.VideoSrcChanged && songInfo.videoId) {
@@ -184,17 +188,20 @@ export class StateManager implements IStateManager {
       }
     });
 
-    ipcMain.on('ytmd:like-status-changed', (_, { isLiked }: { videoId: string; isLiked: boolean }) => {
-      if (this.currentState) {
-        if (this.currentState.isLiked !== isLiked) {
-          const newState: PlayerState = {
-            ...this.currentState,
-            isLiked: isLiked,
-          };
-          this.updateState(newState);
+    ipcMain.on(
+      'ytmd:like-status-changed',
+      (_, { isLiked }: { videoId: string; isLiked: boolean }) => {
+        if (this.currentState) {
+          if (this.currentState.isLiked !== isLiked) {
+            const newState: PlayerState = {
+              ...this.currentState,
+              isLiked: isLiked,
+            };
+            this.updateState(newState);
+          }
         }
-      }
-    });
+      },
+    );
 
     this.window.webContents.send('ytmd:setup-repeat-changed-listener');
     this.window.webContents.send('ytmd:setup-like-status-listener');
@@ -211,7 +218,7 @@ export class StateManager implements IStateManager {
           if (this.currentState.isShuffled !== isShuffled) {
             const newState: PlayerState = {
               ...this.currentState,
-              isShuffled: isShuffled
+              isShuffled: isShuffled,
             };
             this.updateState(newState);
           }

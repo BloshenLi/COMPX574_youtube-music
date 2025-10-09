@@ -46,12 +46,14 @@ export class MacOSController extends BasePlatformController {
     }
   }
 
-  protected async platformSpecificCreateMenu(items: MenuItemConfig[]): Promise<void> {
+  protected async platformSpecificCreateMenu(
+    items: MenuItemConfig[],
+  ): Promise<void> {
     try {
       console.log(`[macOS] Creating Dock menu with ${items.length} menu items`);
 
-      const menuTemplate: MenuItemConstructorOptions[] = items.map(item =>
-        this.convertToElectronMenuItem(item)
+      const menuTemplate: MenuItemConstructorOptions[] = items.map((item) =>
+        this.convertToElectronMenuItem(item),
       );
 
       this.dockMenu = Menu.buildFromTemplate(menuTemplate);
@@ -93,18 +95,22 @@ export class MacOSController extends BasePlatformController {
     }
   }
 
-  private convertToElectronMenuItem(item: MenuItemConfig): MenuItemConstructorOptions {
+  private convertToElectronMenuItem(
+    item: MenuItemConfig,
+  ): MenuItemConstructorOptions {
     if (item.separator) {
       return { type: 'separator' };
     }
 
     const menuItem: MenuItemConstructorOptions = {
       label: item.label,
-      enabled: item.enabled !== false
+      enabled: item.enabled !== false,
     };
 
     if (item.submenu && item.submenu.length > 0) {
-      menuItem.submenu = item.submenu.map(subItem => this.convertToElectronMenuItem(subItem));
+      menuItem.submenu = item.submenu.map((subItem) =>
+        this.convertToElectronMenuItem(subItem),
+      );
     } else {
       menuItem.click = () => {
         try {

@@ -7,7 +7,7 @@ import type {
   IMenuBuilder,
   MenuItemConfig,
   PlayerState,
-  QuickControlsConfig
+  QuickControlsConfig,
 } from '../types';
 import { RepeatMode } from '../types';
 
@@ -37,7 +37,7 @@ export class MenuBuilder implements IMenuBuilder {
       action: () => {
         this.songControls.playPause();
       },
-      enabled: true
+      enabled: true,
     });
 
     controls.push({
@@ -46,7 +46,7 @@ export class MenuBuilder implements IMenuBuilder {
       action: () => {
         this.songControls.previous();
       },
-      enabled: !state.isPaused
+      enabled: !state.isPaused,
     });
 
     controls.push({
@@ -55,7 +55,7 @@ export class MenuBuilder implements IMenuBuilder {
       action: () => {
         this.songControls.next();
       },
-      enabled: true
+      enabled: true,
     });
 
     return controls;
@@ -68,7 +68,7 @@ export class MenuBuilder implements IMenuBuilder {
       id: 'separator1',
       label: '',
       action: () => {},
-      separator: true
+      separator: true,
     });
 
     const likeLabel = state.isLiked
@@ -76,20 +76,26 @@ export class MenuBuilder implements IMenuBuilder {
       : this.getLocalizedText('plugins.quick-controls.controls.like');
 
     console.log(`[MenuBuilder] Building like menu item:`);
-    console.log(`[MenuBuilder] State: isLiked=${state.isLiked}, canLike=${state.canLike}, hasCurrentSong=${state.hasCurrentSong}`);
-    console.log(`[MenuBuilder] Label: "${likeLabel}" ${state.isLiked ? '❤️' : '🤍'}`);
+    console.log(
+      `[MenuBuilder] State: isLiked=${state.isLiked}, canLike=${state.canLike}, hasCurrentSong=${state.hasCurrentSong}`,
+    );
+    console.log(
+      `[MenuBuilder] Label: "${likeLabel}" ${state.isLiked ? '❤️' : '🤍'}`,
+    );
 
     controls.push({
       id: 'like',
       label: likeLabel,
       action: () => {
-        console.log(`[MenuBuilder] Like menu item clicked, current state: isLiked=${state.isLiked}`);
+        console.log(
+          `[MenuBuilder] Like menu item clicked, current state: isLiked=${state.isLiked}`,
+        );
         this.songControls.like();
         setTimeout(() => {
           this.requestLikeStateRefresh();
         }, 300);
       },
-      enabled: state.canLike && state.hasCurrentSong
+      enabled: state.canLike && state.hasCurrentSong,
     });
 
     controls.push({
@@ -102,18 +108,22 @@ export class MenuBuilder implements IMenuBuilder {
         }, 800);
       },
       enabled: !state.isPaused,
-      checked: state.isShuffled
+      checked: state.isShuffled,
     });
 
     controls.push({
       id: 'repeat',
-      label: this.getLocalizedText('plugins.quick-controls.controls.repeat-mode'),
+      label: this.getLocalizedText(
+        'plugins.quick-controls.controls.repeat-mode',
+      ),
       action: () => {},
       enabled: !state.isPaused,
       submenu: [
         {
           id: 'repeat-off',
-          label: this.getLocalizedText('plugins.quick-controls.repeat.label.off'),
+          label: this.getLocalizedText(
+            'plugins.quick-controls.repeat.label.off',
+          ),
           action: () => {
             if (state.repeatMode !== RepeatMode.OFF) {
               let switches = 0;
@@ -131,11 +141,13 @@ export class MenuBuilder implements IMenuBuilder {
             }
           },
           enabled: true,
-          checked: state.repeatMode === RepeatMode.OFF
+          checked: state.repeatMode === RepeatMode.OFF,
         },
         {
           id: 'repeat-one',
-          label: this.getLocalizedText('plugins.quick-controls.repeat.label.one'),
+          label: this.getLocalizedText(
+            'plugins.quick-controls.repeat.label.one',
+          ),
           action: () => {
             if (state.repeatMode !== RepeatMode.ONE) {
               let switches = 0;
@@ -153,11 +165,13 @@ export class MenuBuilder implements IMenuBuilder {
             }
           },
           enabled: true,
-          checked: state.repeatMode === RepeatMode.ONE
+          checked: state.repeatMode === RepeatMode.ONE,
         },
         {
           id: 'repeat-all',
-          label: this.getLocalizedText('plugins.quick-controls.repeat.label.all'),
+          label: this.getLocalizedText(
+            'plugins.quick-controls.repeat.label.all',
+          ),
           action: () => {
             if (state.repeatMode !== RepeatMode.ALL) {
               let switches = 0;
@@ -175,15 +189,18 @@ export class MenuBuilder implements IMenuBuilder {
             }
           },
           enabled: true,
-          checked: state.repeatMode === RepeatMode.ALL
-        }
-      ]
+          checked: state.repeatMode === RepeatMode.ALL,
+        },
+      ],
     });
 
     return controls;
   }
 
-  async buildFullMenu(state: PlayerState, config: QuickControlsConfig): Promise<MenuItemConfig[]> {
+  async buildFullMenu(
+    state: PlayerState,
+    config: QuickControlsConfig,
+  ): Promise<MenuItemConfig[]> {
     const menuItems: MenuItemConfig[] = [];
 
     if (config.showPlaybackControls) {
@@ -191,7 +208,10 @@ export class MenuBuilder implements IMenuBuilder {
       menuItems.push(...playbackControls);
     }
 
-    const needsAdvancedControls = config.showLikeButton || config.showRepeatControl || config.showShuffleControl;
+    const needsAdvancedControls =
+      config.showLikeButton ||
+      config.showRepeatControl ||
+      config.showShuffleControl;
 
     if (needsAdvancedControls) {
       const advancedControls = await this.buildAdvancedControls(state);
@@ -234,7 +254,10 @@ export class MenuBuilder implements IMenuBuilder {
     try {
       this.window.webContents.send('ytmd:refresh-like-status');
     } catch (error) {
-      console.error('[MenuBuilder] Failed to request like state refresh:', error);
+      console.error(
+        '[MenuBuilder] Failed to request like state refresh:',
+        error,
+      );
     }
   }
 
@@ -242,7 +265,10 @@ export class MenuBuilder implements IMenuBuilder {
     try {
       this.window.webContents.send('ytmd:refresh-repeat-status');
     } catch (error) {
-      console.error('[MenuBuilder] Failed to request repeat state refresh:', error);
+      console.error(
+        '[MenuBuilder] Failed to request repeat state refresh:',
+        error,
+      );
     }
   }
 
@@ -250,7 +276,10 @@ export class MenuBuilder implements IMenuBuilder {
     try {
       this.window.webContents.send('ytmd:refresh-shuffle-status');
     } catch (error) {
-      console.error('[MenuBuilder] Failed to request shuffle state refresh:', error);
+      console.error(
+        '[MenuBuilder] Failed to request shuffle state refresh:',
+        error,
+      );
     }
   }
 
