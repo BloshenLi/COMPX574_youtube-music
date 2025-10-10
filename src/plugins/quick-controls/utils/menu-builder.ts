@@ -1,16 +1,16 @@
 // Menu builder for creating standardized menu items
-import type { BrowserWindow } from 'electron';
-
 import { t } from '@/i18n';
 import { getSongControls } from '@/providers/song-controls';
 
 import { RepeatMode } from '../types';
+
 import type {
   IMenuBuilder,
   MenuItemConfig,
   PlayerState,
   QuickControlsConfig,
 } from '../types';
+import type { BrowserWindow } from 'electron';
 
 export class MenuBuilder implements IMenuBuilder {
   private songControls: ReturnType<typeof getSongControls>;
@@ -25,7 +25,7 @@ export class MenuBuilder implements IMenuBuilder {
     return t(key);
   }
 
-  async buildPlaybackControls(state: PlayerState): Promise<MenuItemConfig[]> {
+  buildPlaybackControls(state: PlayerState): MenuItemConfig[] {
     const controls: MenuItemConfig[] = [];
 
     const playPauseLabel = state.isPlaying
@@ -62,7 +62,7 @@ export class MenuBuilder implements IMenuBuilder {
     return controls;
   }
 
-  async buildAdvancedControls(state: PlayerState): Promise<MenuItemConfig[]> {
+  buildAdvancedControls(state: PlayerState): MenuItemConfig[] {
     const controls: MenuItemConfig[] = [];
 
     controls.push({
@@ -76,7 +76,7 @@ export class MenuBuilder implements IMenuBuilder {
       ? this.getLocalizedText('plugins.quick-controls.controls.unlike')
       : this.getLocalizedText('plugins.quick-controls.controls.like');
 
-    console.log(`[MenuBuilder] Building like menu item:`);
+    console.log('[MenuBuilder] Building like menu item:');
     console.log(
       `[MenuBuilder] State: isLiked=${state.isLiked}, canLike=${state.canLike}, hasCurrentSong=${state.hasCurrentSong}`,
     );
@@ -198,14 +198,14 @@ export class MenuBuilder implements IMenuBuilder {
     return controls;
   }
 
-  async buildFullMenu(
+  buildFullMenu(
     state: PlayerState,
     config: QuickControlsConfig,
-  ): Promise<MenuItemConfig[]> {
+  ): MenuItemConfig[] {
     const menuItems: MenuItemConfig[] = [];
 
     if (config.showPlaybackControls) {
-      const playbackControls = await this.buildPlaybackControls(state);
+      const playbackControls = this.buildPlaybackControls(state);
       menuItems.push(...playbackControls);
     }
 
@@ -215,7 +215,7 @@ export class MenuBuilder implements IMenuBuilder {
       config.showShuffleControl;
 
     if (needsAdvancedControls) {
-      const advancedControls = await this.buildAdvancedControls(state);
+      const advancedControls = this.buildAdvancedControls(state);
 
       for (const item of advancedControls) {
         switch (item.id) {

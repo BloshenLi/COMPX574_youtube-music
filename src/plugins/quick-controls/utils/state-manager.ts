@@ -1,5 +1,4 @@
 // Player state manager for tracking YouTube Music player state
-import type { BrowserWindow } from 'electron';
 import { ipcMain } from 'electron';
 
 import {
@@ -9,7 +8,9 @@ import {
 } from '@/providers/song-info';
 
 import { RepeatMode } from '../types';
+
 import type { IStateManager, PlayerState } from '../types';
+import type { BrowserWindow } from 'electron';
 
 export class StateManager implements IStateManager {
   private stateCallbacks: Set<(state: PlayerState) => void> = new Set();
@@ -33,7 +34,7 @@ export class StateManager implements IStateManager {
     }, 3000);
   }
 
-  async getCurrentState(): Promise<PlayerState> {
+  getCurrentState(): PlayerState {
     try {
       const defaultState: PlayerState = {
         isPlaying: false,
@@ -50,7 +51,7 @@ export class StateManager implements IStateManager {
       }
 
       return defaultState;
-    } catch (_error) {
+    } catch {
       return {
         isPlaying: false,
         isPaused: true,
@@ -71,12 +72,15 @@ export class StateManager implements IStateManager {
     this.stateCallbacks.delete(callback);
   }
 
-  async refreshState(): Promise<void> {
+  refreshState(): Promise<void> {
     try {
-      const newState = await this.getCurrentState();
+      const newState = this.getCurrentState();
       this.currentState = newState;
       this.notifyStateChange(newState);
-    } catch (_error) {}
+      return Promise.resolve();
+    } catch {
+      return Promise.resolve();
+    }
   }
 
   private setupSongInfoListener(): void {
@@ -108,7 +112,7 @@ export class StateManager implements IStateManager {
 
           this.updateState(newState);
         }
-      } catch (_error) {}
+      } catch {}
     };
 
     registerCallback(this.songInfoCallback);
@@ -125,7 +129,7 @@ export class StateManager implements IStateManager {
     for (const callback of this.stateCallbacks) {
       try {
         callback(state);
-      } catch (_error) {}
+      } catch {}
     }
   }
 

@@ -34,7 +34,10 @@ export interface MenuItemConfig {
 }
 
 export interface IPlatformController {
-  initialize(window: any, config: QuickControlsConfig): Promise<void>;
+  initialize(
+    window: Electron.BrowserWindow,
+    config: QuickControlsConfig,
+  ): Promise<void>;
   createMenu(items: MenuItemConfig[]): Promise<void>;
   updatePlayerState(state: PlayerState): Promise<void>;
   destroy(): Promise<void>;
@@ -43,17 +46,17 @@ export interface IPlatformController {
 }
 
 export interface IStateManager {
-  getCurrentState(): Promise<PlayerState>;
+  getCurrentState(): PlayerState;
   onStateChange(callback: (state: PlayerState) => void): void;
   removeStateListener(callback: (state: PlayerState) => void): void;
   refreshState(): Promise<void>;
 }
 
 export interface IMenuBuilder {
-  buildPlaybackControls(state: PlayerState): Promise<MenuItemConfig[]>;
-  buildAdvancedControls(state: PlayerState): Promise<MenuItemConfig[]>;
+  buildPlaybackControls(state: PlayerState): MenuItemConfig[];
+  buildAdvancedControls(state: PlayerState): MenuItemConfig[];
   buildFullMenu(
     state: PlayerState,
     config: QuickControlsConfig,
-  ): Promise<MenuItemConfig[]>;
+  ): MenuItemConfig[];
 }

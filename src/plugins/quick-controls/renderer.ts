@@ -1,7 +1,7 @@
 // Quick Controls renderer script
-import type { RendererContext } from '@/types/contexts';
-
 import { createRenderer } from '@/utils';
+
+import type { RendererContext } from '@/types/contexts';
 
 import type { QuickControlsConfig } from './types';
 
@@ -19,9 +19,9 @@ export const renderer = createRenderer<
       retryCount: number = 0,
     ) => {
       // likeStatus
-      const likeButtonRenderer = document.querySelector(
-        '#like-button-renderer',
-      ) as any;
+      const likeButtonRenderer = document.querySelector<
+        HTMLElement & { likeStatus?: string }
+      >('#like-button-renderer');
 
       if (!likeButtonRenderer) {
         console.warn('[Quick Controls] #like-button-renderer not found');
@@ -88,7 +88,9 @@ export const renderer = createRenderer<
     const checkRepeatState = () => {
       // getState() repeat mode
       const playerBar = document.querySelector<
-        HTMLElement & { getState: () => any }
+        HTMLElement & {
+          getState: () => { queue?: { repeatMode?: string } };
+        }
       >('ytmusic-player-bar');
 
       if (!playerBar || !playerBar.getState) {
@@ -134,9 +136,9 @@ export const renderer = createRenderer<
 
     let lastKnownLikeStatus: string | null = null;
     const checkLikeStatusChange = () => {
-      const likeButtonRenderer = document.querySelector(
-        '#like-button-renderer',
-      ) as any;
+      const likeButtonRenderer = document.querySelector<
+        HTMLElement & { likeStatus?: string }
+      >('#like-button-renderer');
 
       if (!likeButtonRenderer) {
         return;
@@ -157,21 +159,21 @@ export const renderer = createRenderer<
           isLiked: isLiked,
         });
       }
-      lastKnownLikeStatus = currentStatus;
+      lastKnownLikeStatus = currentStatus ?? null;
     };
 
     const setupLikeButtonListener = () => {
       console.log('[Quick Controls] Setting up like button listener...');
-      const likeButtonRenderer = document.querySelector(
-        '#like-button-renderer',
-      ) as any;
+      const likeButtonRenderer = document.querySelector<
+        HTMLElement & { likeStatus?: string }
+      >('#like-button-renderer');
 
       if (!likeButtonRenderer) {
         setTimeout(setupLikeButtonListener, 1000);
         return;
       }
 
-      lastKnownLikeStatus = likeButtonRenderer.likeStatus;
+      lastKnownLikeStatus = likeButtonRenderer.likeStatus ?? null;
 
       const buttons = document.querySelectorAll('#like-button-renderer button');
       const likeButton = buttons[0] as HTMLElement;
@@ -221,7 +223,9 @@ export const renderer = createRenderer<
     let lastKnownRepeatMode: string | null = null;
     const checkRepeatStateChange = () => {
       const playerBar = document.querySelector<
-        HTMLElement & { getState: () => any }
+        HTMLElement & {
+          getState: () => { queue?: { repeatMode?: string } };
+        }
       >('ytmusic-player-bar');
 
       if (!playerBar || !playerBar.getState) {

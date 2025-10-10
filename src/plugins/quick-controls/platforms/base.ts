@@ -142,7 +142,7 @@ export abstract class BasePlatformController implements IPlatformController {
     }
 
     try {
-      const state = this.currentState || (await this.getCurrentPlayerState());
+      const state = this.currentState || this.getCurrentPlayerState();
 
       console.log(`[${this.getPlatformName()}] Refreshing menu with state:`, {
         isLiked: state.isLiked,
@@ -151,10 +151,7 @@ export abstract class BasePlatformController implements IPlatformController {
         isPlaying: state.isPlaying,
       });
 
-      const menuItems = await this.menuBuilder.buildFullMenu(
-        state,
-        this.config,
-      );
+      const menuItems = this.menuBuilder.buildFullMenu(state, this.config);
       await this.createMenu(menuItems);
     } catch (error) {
       console.error(`[${this.getPlatformName()}] Menu refresh failed:`, error);
@@ -176,12 +173,12 @@ export abstract class BasePlatformController implements IPlatformController {
     console.log(`[${this.getPlatformName()}] Removing state listeners`);
   }
 
-  protected async getCurrentPlayerState(): Promise<PlayerState> {
+  protected getCurrentPlayerState(): PlayerState {
     if (!this.stateManager) {
       throw new Error('StateManager not initialized');
     }
 
-    return await this.stateManager.getCurrentState();
+    return this.stateManager.getCurrentState();
   }
 
   protected hasPlayerStateChanged(newState: PlayerState): boolean {

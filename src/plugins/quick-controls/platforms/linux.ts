@@ -1,4 +1,7 @@
 // Linux system tray menu implementation
+import * as fs from 'fs';
+import * as path from 'path';
+
 import {
   app,
   Menu,
@@ -7,15 +10,14 @@ import {
   type MenuItemConstructorOptions,
 } from 'electron';
 import is from 'electron-is';
-import * as path from 'path';
 
 import { t } from '@/i18n';
 
-import { BasePlatformController } from './base';
 import { MenuBuilder } from '../utils/menu-builder';
 import { StateManager } from '../utils/state-manager';
-
 import type { MenuItemConfig } from '../types';
+
+import { BasePlatformController } from './base';
 
 export class LinuxController extends BasePlatformController {
   private tray: Tray | null = null;
@@ -29,7 +31,7 @@ export class LinuxController extends BasePlatformController {
     return is.linux();
   }
 
-  protected async initializeComponents(): Promise<void> {
+  protected initializeComponents(): Promise<void> {
     if (!this.window) {
       throw new Error('Window reference not initialized');
     }
@@ -44,20 +46,22 @@ export class LinuxController extends BasePlatformController {
     });
 
     console.log('[Linux] Components initialization completed');
+    return Promise.resolve();
   }
 
-  protected async platformSpecificInitialize(): Promise<void> {
+  protected platformSpecificInitialize(): Promise<void> {
     try {
       console.log('[Linux] Executing platform-specific initialization');
-      await this.createTrayIcon();
+      this.createTrayIcon();
       console.log('[Linux] Platform initialization completed');
+      return Promise.resolve();
     } catch (error) {
       console.error('[Linux] Platform initialization failed:', error);
       throw error;
     }
   }
 
-  private async createTrayIcon(): Promise<void> {
+  private createTrayIcon(): void {
     try {
       const iconPath = this.getTrayIconPath();
       const icon = nativeImage.createFromPath(iconPath);
@@ -105,8 +109,6 @@ export class LinuxController extends BasePlatformController {
   }
 
   private getTrayIconPath(): string {
-    const fs = require('fs');
-
     const possiblePaths = [
       path.join(
         __dirname,
@@ -170,9 +172,7 @@ export class LinuxController extends BasePlatformController {
     return possiblePaths[0];
   }
 
-  protected async platformSpecificCreateMenu(
-    items: MenuItemConfig[],
-  ): Promise<void> {
+  protected platformSpecificCreateMenu(items: MenuItemConfig[]): Promise<void> {
     try {
       console.log(`[Linux] Creating tray menu with ${items.length} menu items`);
 
@@ -216,13 +216,14 @@ export class LinuxController extends BasePlatformController {
       } else {
         throw new Error('Tray not initialized');
       }
+      return Promise.resolve();
     } catch (error) {
       console.error('[Linux] Tray menu creation failed:', error);
       throw error;
     }
   }
 
-  protected async platformSpecificDestroy(): Promise<void> {
+  protected platformSpecificDestroy(): Promise<void> {
     try {
       console.log('[Linux] Executing platform-specific cleanup');
 
@@ -242,8 +243,10 @@ export class LinuxController extends BasePlatformController {
       }
 
       console.log('[Linux] Platform cleanup completed');
+      return Promise.resolve();
     } catch (error) {
       console.error('[Linux] Platform cleanup failed:', error);
+      throw error;
     }
   }
 

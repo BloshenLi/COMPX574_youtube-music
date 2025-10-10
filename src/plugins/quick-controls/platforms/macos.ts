@@ -2,10 +2,11 @@
 import { app, Menu, type MenuItemConstructorOptions } from 'electron';
 import is from 'electron-is';
 
-import { BasePlatformController } from './base';
-import type { MenuItemConfig } from '../types';
 import { MenuBuilder } from '../utils/menu-builder';
 import { StateManager } from '../utils/state-manager';
+import type { MenuItemConfig } from '../types';
+
+import { BasePlatformController } from './base';
 
 export class MacOSController extends BasePlatformController {
   private dockMenu: Electron.Menu | null = null;
@@ -18,7 +19,7 @@ export class MacOSController extends BasePlatformController {
     return is.macOS() && !!app.dock;
   }
 
-  protected async initializeComponents(): Promise<void> {
+  protected initializeComponents(): Promise<void> {
     if (!this.window) {
       throw new Error('Window reference not initialized');
     }
@@ -27,9 +28,10 @@ export class MacOSController extends BasePlatformController {
     this.stateManager = new StateManager(this.window);
     this.menuBuilder = new MenuBuilder(this.window);
     console.log('[macOS] Components initialization completed');
+    return Promise.resolve();
   }
 
-  protected async platformSpecificInitialize(): Promise<void> {
+  protected platformSpecificInitialize(): Promise<void> {
     try {
       console.log('[macOS] Executing platform-specific initialization');
 
@@ -39,15 +41,14 @@ export class MacOSController extends BasePlatformController {
       }
 
       console.log('[macOS] Platform initialization completed');
+      return Promise.resolve();
     } catch (error) {
       console.error('[macOS] Platform initialization failed:', error);
       throw error;
     }
   }
 
-  protected async platformSpecificCreateMenu(
-    items: MenuItemConfig[],
-  ): Promise<void> {
+  protected platformSpecificCreateMenu(items: MenuItemConfig[]): Promise<void> {
     try {
       console.log(`[macOS] Creating Dock menu with ${items.length} menu items`);
 
@@ -63,18 +64,19 @@ export class MacOSController extends BasePlatformController {
       } else {
         throw new Error('Dock API not available');
       }
+      return Promise.resolve();
     } catch (error) {
       console.error('[macOS] Dock menu creation failed:', error);
       throw error;
     }
   }
 
-  protected async platformSpecificDestroy(): Promise<void> {
+  protected platformSpecificDestroy(): Promise<void> {
     try {
       console.log('[macOS] Executing platform-specific cleanup');
 
       if (app.dock) {
-        app.dock.setMenu(null as any);
+        app.dock.setMenu(Menu.buildFromTemplate([]));
         console.log('[macOS] Dock menu cleared');
       }
 
@@ -89,8 +91,10 @@ export class MacOSController extends BasePlatformController {
       }
 
       console.log('[macOS] Platform cleanup completed');
+      return Promise.resolve();
     } catch (error) {
       console.error('[macOS] Platform cleanup failed:', error);
+      throw error;
     }
   }
 
