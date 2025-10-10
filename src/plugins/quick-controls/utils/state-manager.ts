@@ -50,7 +50,7 @@ export class StateManager implements IStateManager {
       }
 
       return defaultState;
-    } catch (error) {
+    } catch (_error) {
       return {
         isPlaying: false,
         isPaused: true,
@@ -76,7 +76,7 @@ export class StateManager implements IStateManager {
       const newState = await this.getCurrentState();
       this.currentState = newState;
       this.notifyStateChange(newState);
-    } catch (error) {}
+    } catch (_error) {}
   }
 
   private setupSongInfoListener(): void {
@@ -108,7 +108,7 @@ export class StateManager implements IStateManager {
 
           this.updateState(newState);
         }
-      } catch (error) {}
+      } catch (_error) {}
     };
 
     registerCallback(this.songInfoCallback);
@@ -125,7 +125,7 @@ export class StateManager implements IStateManager {
     for (const callback of this.stateCallbacks) {
       try {
         callback(state);
-      } catch (error) {}
+      } catch (_error) {}
     }
   }
 
