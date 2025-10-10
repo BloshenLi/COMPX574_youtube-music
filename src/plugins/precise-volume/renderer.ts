@@ -66,7 +66,7 @@ export const onPlayerApiReady = async (
     injectVolumeHud(noVid);
     if (!noVid) {
       setupVideoPlayerOnwheel();
-      if (!await window.mainConfig.plugins.isEnabled('video-toggle')) {
+      if (!(await window.mainConfig.plugins.isEnabled('video-toggle'))) {
         // Video-toggle handles hud positioning on its own
         const videoMode = () =>
           api.getPlayerResponse().videoDetails?.musicVideoType !==
@@ -87,6 +87,7 @@ export const onPlayerApiReady = async (
         'beforeend',
         `<span id="volumeHud" style="${position + mainStyle}"></span>`,
       );
+
     } else {
       const position = 'top: 10px; left: 10px;';
       const mainStyle =

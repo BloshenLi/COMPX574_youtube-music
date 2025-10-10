@@ -2,11 +2,14 @@ import { createSignal } from 'solid-js';
 
 import { render } from 'solid-js/web';
 
-import defaultConfig from '@/config/defaults';
+import { defaultConfig } from '@/config/defaults';
 import { getSongMenu } from '@/providers/dom-elements';
 import { getSongInfo } from '@/providers/song-info-front';
 import { t } from '@/i18n';
-import { isMusicOrVideoTrack } from '@/plugins/utils/renderer/check';
+import {
+  isAlbumOrPlaylist,
+  isMusicOrVideoTrack,
+} from '@/plugins/utils/renderer/check';
 
 import { DownloadButton } from './templates/download';
 
@@ -25,13 +28,19 @@ const menuObserver = new MutationObserver(() => {
   if (
     !menu ||
     menu.contains(buttonContainer) ||
-    !isMusicOrVideoTrack() ||
+    !(isMusicOrVideoTrack() || isAlbumOrPlaylist()) ||
     !buttonContainer
   ) {
     return;
   }
 
   menu.prepend(buttonContainer);
+
+  // setTimeout(() => {
+  //   if (buttonContainer && !menu.querySelector('#ytmcustom-download')) {
+  //     menu.prepend(buttonContainer);
+  //   }
+  // }, 200);
 });
 
 export const onRendererLoad = ({
@@ -97,6 +106,7 @@ export const onPlayerApiReady = () => {
   buttonContainer.setAttribute('aria-selected', 'false');
   buttonContainer.setAttribute('role', 'option');
   buttonContainer.setAttribute('tabindex', '-1');
+  // buttonContainer.id = 'ytmcustom-download';
 
   render(
     () => <DownloadButton onClick={download} text={downloadButtonText()} />,

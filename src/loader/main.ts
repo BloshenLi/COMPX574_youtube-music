@@ -1,9 +1,9 @@
-import { BrowserWindow, ipcMain } from 'electron';
+import { type BrowserWindow, ipcMain } from 'electron';
 
 import { deepmerge } from 'deepmerge-ts';
 import { allPlugins, mainPlugins } from 'virtual:plugins';
 
-import config from '@/config';
+import * as config from '@/config';
 import { LoggerPrefix, startPlugin, stopPlugin } from '@/utils';
 
 import { t } from '@/i18n';
@@ -38,12 +38,10 @@ const createContext = (
       win.webContents.send(event, ...args);
     },
     handle: (event: string, listener: CallableFunction) => {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-return,@typescript-eslint/no-unsafe-call
       ipcMain.handle(event, (_, ...args: unknown[]) => listener(...args));
     },
     on: (event: string, listener: CallableFunction) => {
       ipcMain.on(event, (_, ...args: unknown[]) => {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
         listener(...args);
       });
     },

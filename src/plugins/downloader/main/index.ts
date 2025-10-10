@@ -2,12 +2,12 @@ import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { randomBytes } from 'node:crypto';
 
-import { app, BrowserWindow, dialog, ipcMain } from 'electron';
+import { app, type BrowserWindow, dialog, ipcMain } from 'electron';
 import { Innertube, UniversalCache, Utils, YTNodes } from 'youtubei.js';
 import is from 'electron-is';
 import filenamify from 'filenamify';
 import { Mutex } from 'async-mutex';
-import NodeID3, { TagConstants } from 'node-id3';
+import * as NodeID3 from 'node-id3';
 import { BG, type BgConfig } from 'bgutils-js';
 import { lazy } from 'lazy-var';
 
@@ -17,7 +17,8 @@ import {
   sendFeedback as sendFeedback_,
   setBadge,
 } from './utils';
-import registerCallback, {
+import {
+  registerCallback,
   cleanupName,
   getImage,
   MediaType,
@@ -86,7 +87,6 @@ const sendError = (error: Error, source?: string) => {
   const songNameMessage = source ? `\nin ${source}` : '';
   const cause = error.cause
     ? `\n\n${
-        // eslint-disable-next-line @typescript-eslint/no-base-to-string,@typescript-eslint/restrict-template-expressions
         error.cause instanceof Error ? error.cause.toString() : error.cause
       }`
     : '';
@@ -169,7 +169,7 @@ export const onMainLoad = async ({
       if (interpreterJavascript) {
         // This is a workaround to run the interpreterJavascript code
         // Maybe there is a better way to do this (e.g. https://github.com/Siubaak/sval ?)
-        // eslint-disable-next-line @typescript-eslint/no-implied-eval,@typescript-eslint/no-unsafe-call
+
         new Function(interpreterJavascript)();
 
         const poTokenResult = await BG.PoToken.generate({
@@ -590,7 +590,7 @@ async function writeID3(
       tags.image = {
         mime: 'image/png',
         type: {
-          id: TagConstants.AttachedPicture.PictureType.FRONT_COVER,
+          id: NodeID3.TagConstants.AttachedPicture.PictureType.FRONT_COVER,
         },
         description: 'thumbnail',
         imageBuffer: coverBuffer,
@@ -848,5 +848,7 @@ const getMetadata = (info: TrackInfo): CustomSongInfo => ({
 const getAndroidTvInfo = async (id: string): Promise<VideoInfo> => {
   // GetInfo 404s with the bypass, so we use getBasicInfo instead
   // that's fine as we only need the streaming data
-  return await yt.getBasicInfo(id, 'TV_EMBEDDED');
+  return await yt.getBasicInfo(id, {
+    client: 'TV_EMBEDDED',
+  });
 };

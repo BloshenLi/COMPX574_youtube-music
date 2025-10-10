@@ -6,6 +6,8 @@
 ytmusic-nav-bar {
   position: relative;
 }
+
+
 ytmusic-nav-bar::before {
   content: '';
   position: absolute;
@@ -13,6 +15,14 @@ ytmusic-nav-bar::before {
 
   -webkit-user-select: none;
   -webkit-app-region: drag;
+}
+
+.drag-mask {
+  position: absolute;
+  inset: 0;
+  -webkit-app-region: no-drag;
+  z-index: 100;  
+  pointer-events: auto;
 }
 
 ytmusic-nav-bar > .left-content > *,
@@ -31,11 +41,6 @@ a {
 /* custom style for navbar */
 ytmusic-app-layout {
   --ytmusic-nav-bar-height: 90px;
-}
-
-/* Blocking annoying elements */
-ytmusic-mealbar-promo-renderer {
-  display: none !important;
 }
 
 /* Disable Image Selection */

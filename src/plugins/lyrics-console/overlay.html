@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Lyrics Overlay</title>
+  <link rel="stylesheet" href="./overlay.css" />
+</head>
+<body>
+<div id="wrap">
+  <div id="panel" class="no-drag">
+    <!-- gear -->
+    <button id="gear" class="no-drag" title="Settings" aria-label="Settings" type="button">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M19.14,12.94a7.49,7.49,0,0,0,.05-.94,7.49,7.49,0,0,0-.05-.94l2.11-1.65a.5.5,0,0,0,.12-.63l-2-3.46a.5.5,0,0,0-.6-.22l-2.49,1a7.36,7.36,0,0,0-1.63-.94l-.38-2.65A.5.5,0,0,0,13.2,2H10.8a.5.5,0,0,0-.49.42L9.93,5.07a7.36,7.36,0,0,0-1.63.94l-2.49-1a.5.5,0,0,0-.6.22l-2,3.46a.5.5,0,0,0,.12.63L5.44,11.06a7.49,7.49,0,0,0,0,1.88L3.33,14.59a.5.5,0,0,0-.12.63l2,3.46a.5.5,0,0,0,.6.22l2.49-1a7.36,7.36,0,0,0,1.63.94l.38,2.65a.5.5,0,0,0,.49.42h2.4a.5.5,0,0,0,.49-.42l.38-2.65a7.36,7.36,0,0,0,1.63-.94l2.49,1a.5.5,0,0,0,.6-.22l2-3.46a.5.5,0,0,0,.12-.63ZM12,15.5A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z"/>
+      </svg>
+    </button>
+
+    <!-- lyrics -->
+    <div id="grid">
+      <div class="row"><div id="prev" class="line-prev hidden"></div></div>
+      <div class="row"><div id="curr" class="line-curr"></div></div>
+      <div class="row"><div id="next" class="line-next hidden"></div></div>
+    </div>
+    <div id="subwrap" class="row"><div id="sub" class="line-sub hidden"></div></div>
+  </div>
+</div>
+
+<!-- settings (clean, no border/shadow) -->
+<div id="panel-settings" class="no-drag" role="dialog" aria-label="Lyrics Settings" style="display:none">
+  <div class="settings-header">
+    <span class="title">Settings</span>
+    <button id="btn-close" class="close no-drag" aria-label="Close" type="button">×</button>
+  </div>
+  <div class="settings-body">
+    <div class="rowset">
+      <label>Current Color</label>
+      <input id="inp-accent" type="color" value="#42e695" />
+    </div>
+
+    <div class="rowset">
+      <label>Opacity</label>
+      <input id="inp-alpha" type="range" min="0" max="1" step="0.01" value="0.85"/>
+    </div>
+
+    <div class="rowset">
+      <label>Font Size</label>
+      <div class="seg">
+        <button data-size="22px" id="fs-s">Small</button>
+        <button data-size="26px" id="fs-m" class="active">Medium</button>
+        <button data-size="32px" id="fs-l">Large</button>
+      </div>
+    </div>
+
+    <div class="rowset">
+      <label>Weight</label>
+      <div class="seg">
+        <button data-weight="700" id="fw-r">Regular</button>
+        <button data-weight="900" id="fw-b" class="active">Bold</button>
+      </div>
+    </div>
+
+    <div class="rowset">
+      <label>Lock Position</label>
+      <div class="check">
+        <label><input id="chk-lock" type="checkbox"> Keep position</label>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // optional ipc
+  let ipc; try { ipc = require?.('electron')?.ipcRenderer; } catch {}
+
+  const $prev = document.getElementById('prev');
+  const $curr = document.getElementById('curr');
+  const $next = document.getElementById('next');
+  const $sub  = document.getElementById('sub');
+
+  const $gear  = document.getElementById('gear');
+  const $ps    = document.getElementById('panel-settings');
+  const $close = document.getElementById('btn-close');
+
+  const $accent = document.getElementById('inp-accent');
+  const $alpha  = document.getElementById('inp-alpha');
+  const $fsS = document.getElementById('fs-s');
+  const $fsM = document.getElementById('fs-m');
+  const $fsL = document.getElementById('fs-l');
+  const $fwR = document.getElementById('fw-r');
+  const $fwB = document.getElementById('fw-b');
+  const $lock= document.getElementById('chk-lock');
+
+  const KEY='__lyrics_overlay_cfg_final__';
+  const rootStyle = document.documentElement.style;
+
+  function load(){ try{ return JSON.parse(localStorage.getItem(KEY)||'{}'); }catch{return{};} }
+  function save(cfg){
+    localStorage.setItem(KEY, JSON.stringify(cfg));
+    ipc?.send?.('lyrics-console:set-config', cfg);
+  }
+  function apply(cfg){
+    if(cfg.accentColor) rootStyle.setProperty('--accent-color', cfg.accentColor);
+    if(typeof cfg.opacity==='number'){
+      rootStyle.setProperty('--panel-bg-alpha', String(cfg.opacity));
+      document.body.classList.toggle('chrome-off', cfg.opacity <= 0.01); // 0: remove chrome (no lines)
+    }
+    if(cfg.fontSize) rootStyle.setProperty('--font-size', cfg.fontSize);
+    if(cfg.weight)   rootStyle.setProperty('--bold', cfg.weight);
+    if(typeof cfg.lock==='boolean'){
+      document.body.classList.toggle('locked', cfg.lock); // CSS disables drag areas
+    }
+  }
+  function setActive(list, el){ list.forEach(btn => btn.classList.toggle('active', btn===el)); }
+
+  // settings open/close
+  function positionSettings(){
+    $ps.style.visibility='hidden';
+    $ps.style.display='flex';
+    const r = $gear.getBoundingClientRect(), pad=8;
+    const w = $ps.offsetWidth, h = $ps.offsetHeight;
+    let left = Math.max(pad, Math.min(window.innerWidth - w - pad, r.right - w));
+    let top  = Math.max(pad, Math.min(window.innerHeight - h - pad, r.bottom + pad));
+    $ps.style.left = left+'px';
+    $ps.style.top  = top +'px';
+    $ps.style.visibility='';
+  }
+  function openSettings(e){
+    e?.stopPropagation?.();
+    document.body.classList.add('settings-open');   // stop drag while panel shown
+    $ps.style.display='flex';
+    $ps.classList.add('open');
+    positionSettings();
+  }
+  function closeSettings(e){
+    e?.stopPropagation?.();
+    $ps.classList.remove('open');
+    $ps.style.display='none';
+    document.body.classList.remove('settings-open');
+  }
+
+  $gear.addEventListener('click', openSettings);
+  $close.addEventListener('click', closeSettings);
+  document.addEventListener('click', (e)=>{
+    if($ps.style.display==='none') return;
+    if(e.target===$gear || $gear.contains(e.target)) return;
+    if($ps.contains(e.target)) return;
+    closeSettings();
+  });
+  window.addEventListener('resize', ()=>{ if($ps.style.display!=='none') positionSettings(); });
+  document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeSettings(); });
+
+  // init
+  (function init(){
+    const cfg = Object.assign({
+      accentColor:'#42e695', opacity:0.85, fontSize:'26px', weight:'900', lock:false
+    }, load());
+    apply(cfg);
+
+    // sync initial lock to main (so window really can/can't move)
+    ipc?.send?.('lyrics-console:set-locked', !!cfg.lock);
+
+    $accent.value=cfg.accentColor;
+    $alpha.value =cfg.opacity;
+    $lock.checked=!!cfg.lock;
+
+    setActive([$fsS,$fsM,$fsL], (cfg.fontSize==='22px')?$fsS:(cfg.fontSize==='32px')?$fsL:$fsM);
+    setActive([$fwR,$fwB], cfg.weight==='700' ? $fwR : $fwB);
+
+    $accent.addEventListener('input', ()=>{ cfg.accentColor=$accent.value; apply(cfg); save(cfg); });
+    $alpha .addEventListener('input', ()=>{ cfg.opacity=Number($alpha.value); apply(cfg); save(cfg); });
+    $fsS.addEventListener('click', ()=>{ cfg.fontSize='22px'; apply(cfg); save(cfg); setActive([$fsS,$fsM,$fsL], $fsS); });
+    $fsM.addEventListener('click', ()=>{ cfg.fontSize='26px'; apply(cfg); save(cfg); setActive([$fsS,$fsM,$fsL], $fsM); });
+    $fsL.addEventListener('click', ()=>{ cfg.fontSize='32px'; apply(cfg); save(cfg); setActive([$fsS,$fsM,$fsL], $fsL); });
+    $fwR.addEventListener('click', ()=>{ cfg.weight='700';  apply(cfg); save(cfg); setActive([$fwR,$fwB], $fwR); });
+    $fwB.addEventListener('click', ()=>{ cfg.weight='900';  apply(cfg); save(cfg); setActive([$fwR,$fwB], $fwB); });
+    $lock.addEventListener('change', ()=>{
+      cfg.lock=$lock.checked; apply(cfg); save(cfg);
+      ipc?.send?.('lyrics-console:set-locked', cfg.lock);   // << 真正锁定窗口移动
+    });
+  })();
+
+  // render API
+  window.__setLine = function (t) {
+    $prev.textContent = ''; $prev.classList.add('hidden');
+    $next.textContent = ''; $next.classList.add('hidden');
+    $sub .textContent = ''; $sub .classList.add('hidden');
+    $curr.textContent = String(t ?? '');
+  };
+  window.__setKaraoke = function (p) {
+    p=p||{};
+    const prev=(p.prev||'').trim(), curr=(p.current||'').trim(), next=(p.next||'').trim(), sub=(p.sub||'').trim();
+    $curr.textContent = curr;
+    $prev.textContent = prev; $prev.classList.toggle('hidden', !prev || prev===curr);
+    $next.textContent = next; $next.classList.toggle('hidden', !next || next===curr);
+    $sub .textContent = sub ; $sub .classList.toggle('hidden', !sub);
+  };
+</script>
+</body>
+</html>
