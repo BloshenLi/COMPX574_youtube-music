@@ -2,11 +2,11 @@
 import { app, Menu, type MenuItemConstructorOptions } from 'electron';
 import is from 'electron-is';
 
+import { BasePlatformController } from './base';
 import { MenuBuilder } from '../utils/menu-builder';
 import { StateManager } from '../utils/state-manager';
-import type { MenuItemConfig } from '../types';
 
-import { BasePlatformController } from './base';
+import type { MenuItemConfig } from '../types';
 
 export class MacOSController extends BasePlatformController {
   private dockMenu: Electron.Menu | null = null;

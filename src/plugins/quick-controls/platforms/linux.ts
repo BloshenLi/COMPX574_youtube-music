@@ -13,11 +13,11 @@ import is from 'electron-is';
 
 import { t } from '@/i18n';
 
+import { BasePlatformController } from './base';
 import { MenuBuilder } from '../utils/menu-builder';
 import { StateManager } from '../utils/state-manager';
-import type { MenuItemConfig } from '../types';
 
-import { BasePlatformController } from './base';
+import type { MenuItemConfig } from '../types';
 
 export class LinuxController extends BasePlatformController {
   private tray: Tray | null = null;
